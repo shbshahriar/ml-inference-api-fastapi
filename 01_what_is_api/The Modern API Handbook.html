@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Modern API Handbook: Interactive Experience</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Chosen Palette: Warm Neutrals & Subtle Amber (Stone-50, Stone-800, Amber-100, Amber-600) -->
+    
+    <!-- Application Structure Plan: The SPA is structured as a dynamic, tabbed dashboard. This structure was chosen because it breaks down the theoretical, textbook-style report into digestible, task-oriented modules. Users can navigate non-linearly between the fundamental concepts (Analogy), architectural comparisons (Architecture), data formats (JSON), and advanced applications (Machine Learning & FastAPI). This prevents cognitive overload and allows for focused interactive exploration of each distinct topic, greatly improving usability over a long, scrolling text document. -->
+    
+    <!-- Visualization & Content Choices: 
+    1. Analogy (Goal: Inform) -> Interactive HTML/CSS blocks -> User clicks roles to reveal definitions -> Justification: Active discovery reinforces the mental model better than static text -> HTML/JS.
+    2. Architecture (Goal: Compare) -> Bar Chart -> Hover/Tooltip -> Justification: Visually quantifies the abstract benefits of decoupled systems (scaling/deployment speed) mentioned in the text -> Chart.js.
+    3. JSON (Goal: Inform/Organize) -> Toggle View -> Click to switch formatting -> Justification: Demonstrates the "Universal Language" concept practically -> HTML/JS.
+    4. ML Perspective (Goal: Inform/Interact) -> Simulated Chat UI -> User inputs text to see API JSON response -> Justification: Directly illustrates "Inference as a Service" -> HTML/JS.
+    5. FastAPI (Goal: Compare) -> Horizontal Bar Chart -> Hover -> Justification: Highlights the speed claims from the text against industry standards -> Chart.js.
+    -->
+    
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <style>
+        body {
+            background-color: #fafaf9;
+            color: #292524;
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 650px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 40vh;
+            max-height: 350px;
+            min-height: 250px;
+        }
+
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 45vh;
+                max-height: 400px;
+            }
+        }
+
+        .hide {
+            display: none !important;
+        }
+
+        .nav-btn {
+            transition: all 0.2s ease-in-out;
+        }
+
+        .nav-btn.active {
+            background-color: #fef3c7;
+            color: #d97706;
+            border-left-width: 4px;
+            border-left-color: #d97706;
+            font-weight: 600;
+        }
+
+        .restaurant-entity {
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+
+        .restaurant-entity:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .json-block {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        }
+    </style>
+</head>
+<body class="flex flex-col md:flex-row min-h-screen">
+
+    <nav class="w-full md:w-64 bg-white shadow-lg md:h-screen md:sticky md:top-0 z-10 flex flex-col">
+        <div class="p-6 border-b border-stone-200">
+            <h1 class="text-2xl font-bold text-stone-800 leading-tight">API Handbook<span class="text-amber-600">.</span></h1>
+            <p class="text-xs text-stone-500 mt-2">Web Fundamentals to AI</p>
+        </div>
+        <div class="flex-1 overflow-y-auto py-4 flex flex-col gap-1 px-2" id="nav-container">
+            <button class="nav-btn active text-left px-4 py-3 rounded-r-lg text-stone-600 hover:bg-stone-100" data-target="sec-intro">
+                &#128214; 1. Introduction
+            </button>
+            <button class="nav-btn text-left px-4 py-3 rounded-r-lg text-stone-600 hover:bg-stone-100" data-target="sec-analogy">
+                &#127869; 2. The Analogy
+            </button>
+            <button class="nav-btn text-left px-4 py-3 rounded-r-lg text-stone-600 hover:bg-stone-100" data-target="sec-arch">
+                &#127970; 3. Architecture
+            </button>
+            <button class="nav-btn text-left px-4 py-3 rounded-r-lg text-stone-600 hover:bg-stone-100" data-target="sec-json">
+                &#128196; 4. Data (JSON)
+            </button>
+            <button class="nav-btn text-left px-4 py-3 rounded-r-lg text-stone-600 hover:bg-stone-100" data-target="sec-ml">
+                &#129504; 5. ML Perspective
+            </button>
+            <button class="nav-btn text-left px-4 py-3 rounded-r-lg text-stone-600 hover:bg-stone-100" data-target="sec-fastapi">
+                &#9889; 6. FastAPI
+            </button>
+        </div>
+    </nav>
+
+    <main class="flex-1 p-6 md:p-12 overflow-y-auto">
+        
+        <section id="sec-intro" class="tab-content max-w-4xl mx-auto">
+            <div class="bg-amber-50 border-l-4 border-amber-500 p-4 mb-8 rounded-r-lg">
+                <p class="text-sm text-stone-700"><strong>Section Purpose:</strong> This introductory section sets the foundation of the application. It explains the core concept of what an API is and why a universal communication layer became necessary as technology expanded. It serves to orient the user before diving into deeper architectural concepts.</p>
+            </div>
+
+            <h2 class="text-4xl font-extrabold text-stone-900 mb-6">The Universal Connector</h2>
+            
+            <div class="bg-white rounded-xl shadow-sm p-8 border border-stone-100 mb-8 text-lg text-stone-700 leading-relaxed space-y-6">
+                <p>In the early days of computing, software was often a "black box"—a single entity where the user interface and the underlying logic were inseparable.</p>
+                <p>As the digital ecosystem expanded to include web browsers, mobile phones, and IoT devices, the need for a universal communication layer became critical.</p>
+                <div class="p-6 bg-stone-50 rounded-lg border border-stone-200">
+                    <p class="font-semibold text-xl text-stone-800 mb-2">The API (Application Programming Interface)</p>
+                    <p>Emerged as this layer. It is a set of defined rules that allow two software components to talk to each other without needing to know how the other is built.</p>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm p-8 border border-stone-100 text-lg text-stone-700 leading-relaxed">
+                <h3 class="text-2xl font-bold text-stone-800 mb-4">Conclusion & Summary</h3>
+                <p>APIs are the "glue" of the modern internet. By understanding how they work, developers can build scalable, secure, and cross-platform applications. For Machine Learning practitioners, mastering APIs is the final bridge between a model that works on a local laptop and a product that serves millions of users.</p>
+            </div>
+        </section>
+
+        <section id="sec-analogy" class="tab-content hide max-w-4xl mx-auto">
+            <div class="bg-amber-50 border-l-4 border-amber-500 p-4 mb-8 rounded-r-lg">
+                <p class="text-sm text-stone-700"><strong>Section Purpose:</strong> This section translates the abstract concept of APIs into a relatable real-world scenario (a restaurant). Users interact with the elements to understand the distinct roles of the Client, Server, and the API itself, establishing a strong mental model based on the report's text.</p>
+            </div>
+
+            <h2 class="text-4xl font-extrabold text-stone-900 mb-6">Defining the API: The "Waiter" Analogy</h2>
+            <p class="text-lg text-stone-600 mb-8">To understand an API, we can look at a scenario everyone understands: dining at a restaurant. Click on each role below to reveal its technical equivalent.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="restaurant-entity bg-white p-6 rounded-xl shadow-md border border-stone-200 text-center" onclick="showAnalogyDetail('client')">
+                    <div class="text-5xl mb-4">&#128100;</div>
+                    <h3 class="font-bold text-xl text-stone-800">The Customer</h3>
+                    <p class="text-stone-500 text-sm mt-2">Click to inspect</p>
+                </div>
+                <div class="restaurant-entity bg-amber-100 p-6 rounded-xl shadow-md border border-amber-200 text-center" onclick="showAnalogyDetail('api')">
+                    <div class="text-5xl mb-4">&#128114;</div>
+                    <h3 class="font-bold text-xl text-amber-800">The Waiter</h3>
+                    <p class="text-amber-600 text-sm mt-2">Click to inspect</p>
+                </div>
+                <div class="restaurant-entity bg-stone-800 p-6 rounded-xl shadow-md border border-stone-900 text-center" onclick="showAnalogyDetail('server')">
+                    <div class="text-5xl mb-4">&#127859;</div>
+                    <h3 class="font-bold text-xl text-white">The Kitchen</h3>
+                    <p class="text-stone-400 text-sm mt-2">Click to inspect</p>
+                </div>
+            </div>
+
+            <div id="analogy-detail" class="bg-white rounded-xl shadow-inner p-8 border border-stone-200 min-h-[200px] flex items-center justify-center text-center">
+                <p class="text-stone-500 italic">Select an entity above to reveal its role in the API ecosystem.</p>
+            </div>
+
+            <div class="mt-8 p-6 bg-stone-100 rounded-lg">
+                <h4 class="font-bold text-lg text-stone-800 mb-2">Why this is powerful:</h4>
+                <p class="text-stone-700">The API acts as a <strong class="text-amber-600">contract</strong>. If the menu says "Pepperoni Pizza," and you order it, the API guarantees that the kitchen will return that specific item. You don't need to know if the oven is gas or electric; you only need to know how to talk to the waiter.</p>
+            </div>
+        </section>
+
+        <section id="sec-arch" class="tab-content hide max-w-5xl mx-auto">
+            <div class="bg-amber-50 border-l-4 border-amber-500 p-4 mb-8 rounded-r-lg">
+                <p class="text-sm text-stone-700"><strong>Section Purpose:</strong> This section compares Monolithic and Decoupled architectures, explaining *why* APIs are needed. It uses an interactive chart to visually represent the abstract benefits (scalability and deployment flexibility) mentioned in the report, providing a quantitative feel to qualitative insights.</p>
+            </div>
+
+            <h2 class="text-4xl font-extrabold text-stone-900 mb-6">The Architectural Shift</h2>
+            <p class="text-lg text-stone-600 mb-8">Understanding why we need APIs requires looking at how software is structured.</p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+                <div class="bg-white p-8 rounded-xl shadow-sm border border-red-100">
+                    <div class="text-4xl mb-4">&#128230;</div>
+                    <h3 class="text-2xl font-bold text-stone-800 mb-3">The Monolithic Era</h3>
+                    <p class="text-sm font-semibold text-red-500 mb-4">Tightly Coupled</p>
+                    <p class="text-stone-700 mb-4">In a monolithic architecture, the Front-end (what you see) and the Back-end (the logic) are one single codebase.</p>
+                    <ul class="space-y-2 text-stone-600">
+                        <li>&#10060; <strong>The Problem:</strong> Rigid structure.</li>
+                        <li>&#10060; If you want to build an Android app for your existing website, you have to rewrite the entire logic for the app.</li>
+                        <li>&#10060; Slow to scale and hard to maintain.</li>
+                    </ul>
+                </div>
+
+                <div class="bg-white p-8 rounded-xl shadow-sm border border-green-100">
+                    <div class="text-4xl mb-4">&#128423;</div>
+                    <h3 class="text-2xl font-bold text-stone-800 mb-3">The Modern Era</h3>
+                    <p class="text-sm font-semibold text-green-600 mb-4">Decoupled Architecture</p>
+                    <p class="text-stone-700 mb-4">By using APIs, we decouple the systems. The Back-end becomes a "Service" that lives independently.</p>
+                    <ul class="space-y-2 text-stone-600">
+                        <li>&#9989; <strong>The Benefit:</strong> A single Back-end can now serve data to a Website, iPhone app, and Android app simultaneously.</li>
+                        <li>&#9989; <strong>Security:</strong> The API provides a secure gateway instead of direct database access.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                <h4 class="text-center font-bold text-stone-800 mb-6">Impact Comparison: Monolith vs. Decoupled (Simulated Metrics)</h4>
+                <div class="chart-container">
+                    <canvas id="archChart"></canvas>
+                </div>
+                <p class="text-center text-xs text-stone-500 mt-4">Visualizing the performance and flexibility gains described in the architectural shift.</p>
+            </div>
+        </section>
+
+        <section id="sec-json" class="tab-content hide max-w-4xl mx-auto">
+            <div class="bg-amber-50 border-l-4 border-amber-500 p-4 mb-8 rounded-r-lg">
+                <p class="text-sm text-stone-700"><strong>Section Purpose:</strong> This section introduces JSON as the universal language of APIs. The interactive element allows users to toggle between a human-readable view and raw JSON format, solidifying the concept of how data is universally structured and transmitted across the web.</p>
+            </div>
+
+            <h2 class="text-4xl font-extrabold text-stone-900 mb-6">The Language of APIs: JSON</h2>
+            <p class="text-lg text-stone-600 mb-8">For a Client and Server to talk, they need a common language. <strong>JSON (JavaScript Object Notation)</strong> is the industry standard.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+                <div class="bg-stone-50 p-4 rounded-lg border border-stone-200 text-center">
+                    <div class="text-2xl mb-2">&#128065;</div>
+                    <h4 class="font-bold text-stone-800">Readable</h4>
+                    <p class="text-sm text-stone-600">Humans can read it easily.</p>
+                </div>
+                <div class="bg-stone-50 p-4 rounded-lg border border-stone-200 text-center">
+                    <div class="text-2xl mb-2">&#128168;</div>
+                    <h4 class="font-bold text-stone-800">Lightweight</h4>
+                    <p class="text-sm text-stone-600">It doesn't use much bandwidth.</p>
+                </div>
+                <div class="bg-stone-50 p-4 rounded-lg border border-stone-200 text-center">
+                    <div class="text-2xl mb-2">&#127758;</div>
+                    <h4 class="font-bold text-stone-800">Universal</h4>
+                    <p class="text-sm text-stone-600">Almost every language parses JSON.</p>
+                </div>
+            </div>
+
+            <div class="bg-stone-800 rounded-xl overflow-hidden shadow-xl">
+                <div class="bg-stone-900 px-6 py-4 flex justify-between items-center border-b border-stone-700">
+                    <span class="text-stone-300 font-mono text-sm">Request: "Get user 101"</span>
+                    <button id="jsonToggleBtn" class="bg-amber-600 hover:bg-amber-500 text-white text-xs px-3 py-1 rounded transition-colors" onclick="toggleJsonView()">
+                        View Raw JSON
+                    </button>
+                </div>
+                
+                <div id="view-human" class="p-8 bg-stone-100 text-stone-800 min-h-[250px]">
+                    <h3 class="text-2xl font-bold mb-4 flex items-center gap-3">
+                        <span class="bg-stone-300 text-stone-700 w-10 h-10 rounded-full flex items-center justify-center">AS</span> 
+                        Alex Smith
+                    </h3>
+                    <div class="grid grid-cols-2 gap-4 max-w-sm">
+                        <div class="text-stone-500 text-sm font-bold">ID:</div>
+                        <div class="font-mono">101</div>
+                        <div class="text-stone-500 text-sm font-bold">Email:</div>
+                        <div>alex@example.com</div>
+                        <div class="text-stone-500 text-sm font-bold">Status:</div>
+                        <div><span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Active</span></div>
+                    </div>
+                </div>
+
+                <div id="view-raw" class="p-8 json-block text-green-400 min-h-[250px] hide text-sm md:text-base whitespace-pre">
+{
+  "id": 101,
+  "name": "Alex Smith",
+  "email": "alex@example.com",
+  "status": "Active"
+}</div>
+            </div>
+        </section>
+
+        <section id="sec-ml" class="tab-content hide max-w-4xl mx-auto">
+            <div class="bg-amber-50 border-l-4 border-amber-500 p-4 mb-8 rounded-r-lg">
+                <p class="text-sm text-stone-700"><strong>Section Purpose:</strong> This section transitions the standard API concept into the realm of AI. It explains "Inference as a Service." The interactive mock chat demonstrates how an ML model replaces a standard database behind the API layer, taking an input and returning a computed JSON prediction.</p>
+            </div>
+
+            <h2 class="text-4xl font-extrabold text-stone-900 mb-6">The Machine Learning Perspective</h2>
+            <p class="text-lg text-stone-600 mb-6">In a typical application, an API fetches data from a database. In Machine Learning (ML), the "Database" is replaced by a <strong>Model</strong>.</p>
+
+            <div class="bg-stone-50 p-6 rounded-xl border border-stone-200 mb-8">
+                <h3 class="font-bold text-xl text-stone-800 mb-4">Advantages for ML Teams</h3>
+                <ul class="space-y-3 text-stone-700">
+                    <li class="flex gap-3"><span class="text-amber-500">&#10148;</span> <strong>Efficiency:</strong> Train a massive model on a powerful GPU server and let millions of mobile users access it via a lightweight API.</li>
+                    <li class="flex gap-3"><span class="text-amber-500">&#10148;</span> <strong>Single Source of Truth:</strong> Update the model in one place (the server), and all apps (Web/iOS/Android) get the updated version instantly.</li>
+                </ul>
+            </div>
+
+            <h3 class="font-bold text-2xl text-stone-800 mb-4">Serving the Model (Inference as a Service)</h3>
+            <p class="text-stone-600 mb-6">When you use an AI tool like ChatGPT, you are interacting with an API. Try simulating a request below.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="border border-stone-300 rounded-lg p-4 bg-white flex flex-col">
+                    <div class="mb-2 font-bold text-stone-500 text-sm">1. Input (Client Side)</div>
+                    <textarea id="ml-input" class="w-full border border-stone-200 rounded p-3 mb-4 focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none h-32" placeholder="Enter a text prompt here (e.g., 'Summarize APIs')..."></textarea>
+                    <button onclick="simulateMLInference()" class="bg-stone-800 text-white py-2 px-4 rounded hover:bg-stone-700 transition-colors mt-auto w-full font-semibold">
+                        Send to ML API
+                    </button>
+                </div>
+
+                <div class="border border-stone-300 rounded-lg bg-stone-900 flex flex-col">
+                    <div class="p-4 border-b border-stone-700 flex justify-between items-center">
+                        <span class="font-bold text-stone-400 text-sm">2 & 3. Processing & Output (Server Side)</span>
+                        <div id="ml-loader" class="hide text-amber-500 animate-pulse text-sm">Processing Model...</div>
+                    </div>
+                    <div id="ml-output" class="p-4 json-block text-emerald-400 text-sm h-48 overflow-y-auto whitespace-pre-wrap">
+// Awaiting request...
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="sec-fastapi" class="tab-content hide max-w-5xl mx-auto">
+            <div class="bg-amber-50 border-l-4 border-amber-500 p-4 mb-8 rounded-r-lg">
+                <p class="text-sm text-stone-700"><strong>Section Purpose:</strong> This final section focuses on FastAPI, highlighting it as the modern standard for ML APIs. The interactive chart provides a visual comparison of speed (as mentioned in the text: "rivaling languages like Go and Node.js"), supporting the textual claims with visual data context.</p>
+            </div>
+
+            <h2 class="text-4xl font-extrabold text-stone-900 mb-6">The Tool of Choice: FastAPI</h2>
+            <p class="text-lg text-stone-600 mb-8">The handbook highlights <strong>FastAPI</strong> as the modern standard for building these interfaces in Python, specifically popular for wrapping ML models for production.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                    <div class="text-3xl mb-3">&#128640;</div>
+                    <h3 class="font-bold text-lg text-stone-800 mb-2">Speed</h3>
+                    <p class="text-stone-600 text-sm">One of the fastest Python frameworks available, rivaling languages like Go and Node.js.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                    <div class="text-3xl mb-3">&#128218;</div>
+                    <h3 class="font-bold text-lg text-stone-800 mb-2">Documentation</h3>
+                    <p class="text-stone-600 text-sm">Automatically generates an interactive "Swagger" UI to test endpoints without front-end code.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                    <div class="text-3xl mb-3">&#128274;</div>
+                    <h3 class="font-bold text-lg text-stone-800 mb-2">Type Safety</h3>
+                    <p class="text-stone-600 text-sm">Uses Python "type hints" to ensure data correctness, reducing bugs significantly.</p>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                <h4 class="text-center font-bold text-stone-800 mb-6">Simulated Framework Speed Comparison (Req/Sec)</h4>
+                <div class="chart-container">
+                    <canvas id="perfChart"></canvas>
+                </div>
+                <p class="text-center text-xs text-stone-500 mt-4">Illustrative data demonstrating FastAPI's performance tier relative to other common web technologies.</p>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        const navBtns = document.querySelectorAll('.nav-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        navBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                navBtns.forEach(b => b.classList.remove('active'));
+                tabContents.forEach(tc => tc.classList.add('hide'));
+                
+                btn.classList.add('active');
+                const targetId = btn.getAttribute('data-target');
+                document.getElementById(targetId).classList.remove('hide');
+            });
+        });
+
+        const analogyData = {
+            client: {
+                title: "The Client (Front-end)",
+                icon: "&#128241;",
+                desc: "Like the customer, the Client (a mobile app, website, or smart device) wants specific data or an action performed. It doesn't process the heavy logic itself; it simply sends a request."
+            },
+            api: {
+                title: "The API",
+                icon: "&#128279;",
+                desc: "Like the waiter, the API takes the request from the Client, transports it securely using defined rules to the Server, and then brings the exact requested response (the food/data) back."
+            },
+            server: {
+                title: "The Server (Back-end/Model)",
+                icon: "&#128421;",
+                desc: "Like the kitchen, the Server contains the database, logic, or Machine Learning model. It receives the order from the API, does the heavy lifting to prepare the data, and hands it back to the API."
+            }
+        };
+
+        function showAnalogyDetail(key) {
+            const detailBox = document.getElementById('analogy-detail');
+            const data = analogyData[key];
+            detailBox.innerHTML = `
+                <div class="animate-fade-in text-center max-w-lg">
+                    <div class="text-4xl mb-4">${data.icon}</div>
+                    <h3 class="text-2xl font-bold text-stone-800 mb-3">${data.title}</h3>
+                    <p class="text-stone-600 text-lg leading-relaxed">${data.desc}</p>
+                </div>
+            `;
+        }
+
+        let isRawJson = false;
+        function toggleJsonView() {
+            isRawJson = !isRawJson;
+            const btn = document.getElementById('jsonToggleBtn');
+            const viewHuman = document.getElementById('view-human');
+            const viewRaw = document.getElementById('view-raw');
+
+            if (isRawJson) {
+                btn.innerText = "View Human UI";
+                viewHuman.classList.add('hide');
+                viewRaw.classList.remove('hide');
+            } else {
+                btn.innerText = "View Raw JSON";
+                viewRaw.classList.add('hide');
+                viewHuman.classList.remove('hide');
+            }
+        }
+
+        function simulateMLInference() {
+            const inputVal = document.getElementById('ml-input').value || "Default inference request";
+            const outputBox = document.getElementById('ml-output');
+            const loader = document.getElementById('ml-loader');
+            const btn = document.querySelector('button[onclick="simulateMLInference()"]');
+
+            btn.disabled = true;
+            btn.classList.add('opacity-50');
+            loader.classList.remove('hide');
+            outputBox.innerText = "";
+
+            setTimeout(() => {
+                const responseObj = {
+                    "status": "success",
+                    "model_used": "v2.5-text-inference",
+                    "latency_ms": 142,
+                    "request_data": inputVal,
+                    "prediction": {
+                        "intent": "learning",
+                        "confidence_score": 0.98,
+                        "generated_text": "APIs allow distinct software systems to communicate seamlessly."
+                    }
+                };
+                
+                outputBox.innerText = JSON.stringify(responseObj, null, 2);
+                loader.classList.add('hide');
+                btn.disabled = false;
+                btn.classList.remove('opacity-50');
+            }, 1500);
+        }
+
+        const wrapLabels = (labels, maxChars = 16) => {
+            return labels.map(label => {
+                const words = label.split(' ');
+                let lines = [];
+                let currentLine = words[0];
+                for (let i = 1; i < words.length; i++) {
+                    if (currentLine.length + words[i].length + 1 <= maxChars) {
+                        currentLine += ' ' + words[i];
+                    } else {
+                        lines.push(currentLine);
+                        currentLine = words[i];
+                    }
+                }
+                lines.push(currentLine);
+                return lines;
+            });
+        };
+
+        const ctxArch = document.getElementById('archChart').getContext('2d');
+        new Chart(ctxArch, {
+            type: 'bar',
+            data: {
+                labels: wrapLabels(['Monolithic Architecture', 'Decoupled Microservices']),
+                datasets: [
+                    {
+                        label: 'Time to Deploy Feature (Days)',
+                        data: [14, 2],
+                        backgroundColor: '#f87171',
+                        borderRadius: 4
+                    },
+                    {
+                        label: 'System Scalability Score (1-100)',
+                        data: [40, 95],
+                        backgroundColor: '#34d399',
+                        borderRadius: 4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top', labels: { font: { family: 'sans-serif' } } },
+                    tooltip: { mode: 'index', intersect: false }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        const ctxPerf = document.getElementById('perfChart').getContext('2d');
+        new Chart(ctxPerf, {
+            type: 'bar',
+            data: {
+                labels: ['Standard Python (Flask)', 'FastAPI', 'Node.js', 'Go'],
+                datasets: [{
+                    label: 'Simulated Requests per Second',
+                    data: [2500, 8500, 9000, 11000],
+                    backgroundColor: [
+                        '#d6d3d1',
+                        '#f59e0b',
+                        '#a8a29e',
+                        '#78716c'
+                    ],
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.raw.toLocaleString() + ' req/sec';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: { beginAtZero: true }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
