@@ -101,9 +101,21 @@ Return the right code so clients know exactly what happened.
 |------|------|-------------|
 | `200` | OK | Successful GET, PUT, DELETE |
 | `201` | Created | Successful POST (new resource added) |
-| `400` | Bad Request | Client sent invalid data |
+| `204` | No Content | Successful DELETE with no response body |
+| `301` | Moved Permanently | Resource URL has permanently changed |
+| `302` | Found | Temporary redirect to another URL |
+| `304` | Not Modified | Cached response is still valid, no data sent |
+| `400` | Bad Request | Client sent invalid or malformed data |
+| `401` | Unauthorized | Not authenticated — login required |
+| `403` | Forbidden | Authenticated but not allowed to access this resource |
 | `404` | Not Found | Resource does not exist |
-| `500` | Server Error | Unhandled exception on the server |
+| `405` | Method Not Allowed | HTTP method not supported on this route |
+| `409` | Conflict | Request conflicts with current state (e.g. duplicate entry) |
+| `422` | Unprocessable Entity | FastAPI validation failed (wrong type, missing field) |
+| `429` | Too Many Requests | Rate limit exceeded |
+| `500` | Internal Server Error | Unhandled exception on the server |
+| `502` | Bad Gateway | Upstream server returned invalid response |
+| `503` | Service Unavailable | Server is down or overloaded |
 
 **Why it matters — bad vs good:**
 
