@@ -1,12 +1,14 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from pathlib import Path
 import json
 from typing import List
 
 app = FastAPI()
 
 def load_data():
-    with open("03_http_methods/patients.json", "r") as f:
+    path = Path(__file__).parent.parent / "Data" / "patients.json"
+    with open(path, "r") as f:
         return json.load(f)
 
 @app.get("/")
