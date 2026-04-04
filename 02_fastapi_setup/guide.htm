@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FastAPI Setup: Interactive Lab</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+
+        :root {
+            --primary: #4f46e5;
+            --bg: #f8fafc;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: #1e293b;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        .step-node.active {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 0 0 4px #e0e7ff;
+        }
+
+        .step-node.complete {
+            background-color: #10b981;
+            color: white;
+        }
+
+        .hide { display: none !important; }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+        .browser-window {
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            overflow: hidden;
+            background: white;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+        }
+
+        .terminal-bg { background-color: #0f172a; }
+
+        /* ── Section content fade-in ── */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        /* ── Green checkmark flash overlay ── */
+        @keyframes checkFlash {
+            0%   { opacity: 0; transform: scale(0.5); }
+            30%  { opacity: 1; transform: scale(1.1); }
+            70%  { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(1); }
+        }
+        .check-overlay {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            pointer-events: none;
+        }
+        .check-overlay .check-icon {
+            width: 96px; height: 96px;
+            background: #10b981;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 48px;
+            color: white;
+            box-shadow: 0 0 40px rgba(16,185,129,0.5);
+            animation: checkFlash 0.4s ease-in-out forwards;
+        }
+
+        /* ── Typewriter caret ── */
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+        .tw-caret::after {
+            content: '_';
+            animation: blink 0.6s step-end infinite;
+            color: #34d399;
+        }
+
+        /* ── Code with line numbers ── */
+        .code-with-lines {
+            display: table;
+            width: 100%;
+        }
+        .code-line {
+            display: table-row;
+        }
+        .line-num {
+            display: table-cell;
+            width: 2.5rem;
+            padding-right: 1rem;
+            text-align: right;
+            color: #4b5563;
+            user-select: none;
+            font-size: 0.75rem;
+            vertical-align: top;
+            padding-top: 1px;
+        }
+        .line-code {
+            display: table-cell;
+            white-space: pre-wrap;
+            vertical-align: top;
+        }
+    </style>
+</head>
+<body class="flex flex-col h-screen">
+
+    <!-- Top Header -->
+    <header class="bg-white border-b border-slate-200 px-8 py-4 flex justify-between items-center shrink-0 z-10">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-2xl shadow-lg shadow-indigo-200">&#128640;</div>
+            <div>
+                <h1 class="text-xl font-extrabold text-slate-900 tracking-tight">FastAPI Deployment Lab</h1>
+                <p class="text-xs text-slate-500 font-medium uppercase tracking-widest">Module 02: Environment &amp; First App</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="text-right hidden sm:block">
+                <p class="text-[10px] font-bold text-slate-400 uppercase">Progress</p>
+                <p id="progress-text" class="text-sm font-bold text-indigo-600">0% Complete</p>
+            </div>
+            <div class="w-32 h-2 bg-slate-100 rounded-full overflow-hidden">
+                <div id="progress-bar" class="h-full bg-indigo-500 transition-all duration-500" style="width:0%"></div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex flex-1 overflow-hidden">
+        <!-- Sidebar Navigation -->
+        <nav class="w-20 md:w-72 bg-white border-r border-slate-200 flex flex-col overflow-y-auto">
+            <div class="p-6 space-y-1" id="step-nav">
+                <!-- Dynamically populated -->
+            </div>
+            <div class="mt-auto p-6 border-t border-slate-100">
+                <button onclick="restartLab()" class="w-full flex items-center justify-center gap-2 px-4 py-2 border border-slate-200 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors">
+                    <span>&#128260;</span> <span class="hidden md:inline">Restart Lab</span>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 overflow-y-auto p-4 md:p-12" id="main-area">
+            <div class="max-w-4xl mx-auto">
+
+                <div id="content-display" class="space-y-8">
+                    <!-- Dynamic content -->
+                </div>
+
+                <!-- Navigation Buttons -->
+                <div class="flex justify-between items-center mt-12 pt-8 border-t border-slate-200">
+                    <div class="flex flex-col items-center gap-1">
+                        <button id="btn-prev" onclick="changeStep(-1)"
+                            class="px-6 py-2 rounded-lg font-bold text-slate-400 hover:text-slate-600 transition-all disabled:opacity-0">
+                            &#8592; Previous
+                        </button>
+                        <span class="text-[10px] text-slate-300 font-mono">&#8592; key</span>
+                    </div>
+
+                    <div class="flex flex-col items-center gap-1">
+                        <button id="btn-next" onclick="changeStep(1)"
+                            class="px-8 py-3 bg-indigo-600 text-white rounded-xl font-bold shadow-lg shadow-indigo-100 hover:bg-indigo-700 hover:-translate-y-0.5 transition-all">
+                            Continue to Next Step
+                        </button>
+                        <span class="text-[10px] text-slate-400 font-mono">&#8594; key</span>
+                    </div>
+                </div>
+
+                <!-- Keyboard tip -->
+                <p class="text-center text-xs text-slate-400 mt-4">Tip: Use &#8592; &#8594; arrow keys to navigate</p>
+
+            </div>
+        </main>
+
+        <!-- Preview Side Panel -->
+        <aside class="hidden xl:flex w-96 bg-slate-50 border-l border-slate-200 flex-col p-6 overflow-y-auto">
+            <h3 class="text-xs font-bold text-slate-400 uppercase mb-6 tracking-widest">Live System Preview</h3>
+
+            <!-- Terminal Preview -->
+            <div class="browser-window terminal-bg mb-8">
+                <div class="bg-slate-800 px-3 py-2 flex gap-1.5">
+                    <div class="w-2.5 h-2.5 rounded-full bg-slate-600"></div>
+                    <div class="w-2.5 h-2.5 rounded-full bg-slate-600"></div>
+                    <div class="w-2.5 h-2.5 rounded-full bg-slate-600"></div>
+                </div>
+                <div id="side-terminal" class="p-4 text-xs mono text-emerald-400 min-h-[120px] leading-relaxed tw-caret">
+                </div>
+            </div>
+
+            <!-- Browser Preview -->
+            <div class="browser-window">
+                <div class="bg-slate-100 px-3 py-2 flex items-center gap-3">
+                    <div class="flex gap-1.5">
+                        <div class="w-2.5 h-2.5 rounded-full bg-slate-300"></div>
+                        <div class="w-2.5 h-2.5 rounded-full bg-slate-300"></div>
+                    </div>
+                    <div id="browser-url" class="flex-1 bg-white border border-slate-200 rounded px-2 py-0.5 text-[10px] text-slate-400 truncate">
+                        http://localhost:8000
+                    </div>
+                </div>
+                <div id="browser-content" class="p-4 min-h-[150px] text-xs mono text-slate-700 break-all whitespace-pre">
+                </div>
+            </div>
+
+            <div class="mt-8 p-4 bg-indigo-50 rounded-xl border border-indigo-100">
+                <h4 class="text-sm font-bold text-indigo-900 mb-2">Pro Tip</h4>
+                <p id="pro-tip" class="text-xs text-indigo-700 leading-relaxed">
+                    FastAPI uses ASGI (Asynchronous Server Gateway Interface) which allows it to handle many requests at once.
+                </p>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Green checkmark overlay (injected by JS) -->
+    <div id="check-overlay" class="check-overlay hide">
+        <div class="check-icon">&#10003;</div>
+    </div>
+
+    <script>
+        // ── Steps data ──────────────────────────────────────────────────────
+        const steps = [
+            {
+                id: "obj",
+                title: "1. Objectives",
+                icon: "&#127919;",
+                intro: "Before diving into the code, let's outline our mission for this session. Completing these steps will give you a fully functional local development environment.",
+                content: `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                            <h3 class="font-bold text-lg mb-4">You will learn how to:</h3>
+                            <ul class="space-y-3">
+                                <li class="flex items-center gap-3"><input type="checkbox" class="w-4 h-4 accent-indigo-600"> <span class="text-sm text-slate-600">Set up FastAPI locally</span></li>
+                                <li class="flex items-center gap-3"><input type="checkbox" class="w-4 h-4 accent-indigo-600"> <span class="text-sm text-slate-600">Create your first app script</span></li>
+                                <li class="flex items-center gap-3"><input type="checkbox" class="w-4 h-4 accent-indigo-600"> <span class="text-sm text-slate-600">Run the Uvicorn server</span></li>
+                                <li class="flex items-center gap-3"><input type="checkbox" class="w-4 h-4 accent-indigo-600"> <span class="text-sm text-slate-600">Verify the /docs interface</span></li>
+                            </ul>
+                        </div>
+                        <div class="flex flex-col justify-center">
+                            <p class="text-slate-500 italic">"The goal is not just to run code, but to understand the bridge between Python and the Web."</p>
+                        </div>
+                    </div>`,
+                terminal: "$ # Ready to begin...",
+                url: "---",
+                browser: "Waiting for server...",
+                tip: "Check each item once you've read through it!"
+            },
+            {
+                id: "install",
+                title: "2. Install via 'uv'",
+                icon: "&#128230;",
+                intro: "FastAPI requires a web server to run. We use <strong>uv</strong>&mdash;a blazing fast Python package manager&mdash;to install our dependencies. No virtual environment setup needed; uv handles that automatically.",
+                content: `
+                    <div class="bg-slate-900 rounded-xl overflow-hidden mb-6">
+                        <div class="bg-slate-800 px-4 py-2 flex justify-between items-center">
+                            <span class="text-xs text-slate-400 mono">Terminal</span>
+                            <button onclick="copyCode(this, 'uv add fastapi\\nuv add uvicorn')" class="text-[10px] bg-slate-700 hover:bg-slate-600 text-indigo-300 font-bold px-3 py-1 rounded transition-colors uppercase">Copy</button>
+                        </div>
+                        <div class="p-6 mono text-indigo-300 text-sm leading-relaxed">
+                            uv add fastapi<br>
+                            uv add uvicorn
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="border-l-4 border-indigo-500 pl-4">
+                            <p class="font-bold text-slate-800">FastAPI</p>
+                            <p class="text-sm text-slate-500">The actual framework used to build your API logic.</p>
+                        </div>
+                        <div class="border-l-4 border-slate-300 pl-4">
+                            <p class="font-bold text-slate-800">Uvicorn</p>
+                            <p class="text-sm text-slate-500">The lightning-fast ASGI server implementation that runs your FastAPI code.</p>
+                        </div>
+                    </div>`,
+                terminal: "$ uv add fastapi\nFetching metadata...\nInstalled fastapi.\n\n$ uv add uvicorn\nInstalled uvicorn.",
+                url: "---",
+                browser: "Server not started yet.",
+                tip: "uv is significantly faster than pip for managing environments!"
+            },
+            {
+                id: "code",
+                title: "3. The Python Script",
+                icon: "&#128013;",
+                intro: "Let's create our first file: <code class='bg-slate-100 px-1 rounded text-sm'>first_app.py</code>. This minimal code is all you need to start a web server.",
+                content: `
+                    <div class="bg-slate-900 rounded-xl overflow-hidden">
+                        <div class="bg-slate-800 px-4 py-2 flex justify-between items-center">
+                            <span class="text-xs text-slate-400 mono">first_app.py</span>
+                            <button onclick="copyCode(this, 'from fastapi import FastAPI\\n\\napp = FastAPI()\\n\\n@app.get(&quot;/&quot;)\\ndef home():\\n    return {&quot;message&quot;: &quot;FastAPI server is running&quot;}')" class="text-[10px] bg-slate-700 hover:bg-slate-600 text-indigo-300 font-bold px-3 py-1 rounded transition-colors uppercase">Copy</button>
+                        </div>
+                        <div class="p-6 mono text-sm leading-relaxed">
+                            <div class="code-with-lines">
+                                <div class="code-line">
+                                    <span class="line-num">1</span>
+                                    <span class="line-code"><span class="text-pink-400">from</span> fastapi <span class="text-pink-400">import</span> FastAPI</span>
+                                </div>
+                                <div class="code-line">
+                                    <span class="line-num">2</span>
+                                    <span class="line-code">&nbsp;</span>
+                                </div>
+                                <div class="code-line">
+                                    <span class="line-num">3</span>
+                                    <span class="line-code">app = <span class="text-amber-300">FastAPI</span>()</span>
+                                </div>
+                                <div class="code-line">
+                                    <span class="line-num">4</span>
+                                    <span class="line-code">&nbsp;</span>
+                                </div>
+                                <div class="code-line">
+                                    <span class="line-num">5</span>
+                                    <span class="line-code"><span class="text-indigo-400">@app.get</span>(<span class="text-emerald-400">"/"</span>)</span>
+                                </div>
+                                <div class="code-line">
+                                    <span class="line-num">6</span>
+                                    <span class="line-code"><span class="text-pink-400">def</span> <span class="text-amber-300">home</span>():</span>
+                                </div>
+                                <div class="code-line">
+                                    <span class="line-num">7</span>
+                                    <span class="line-code">&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-pink-400">return</span> {<span class="text-emerald-400">"message"</span>: <span class="text-emerald-400">"FastAPI server is running"</span>}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-6 space-y-4 text-slate-600 text-sm">
+                        <p><strong>@app.get("/"):</strong> This is a decorator. It tells FastAPI that when a user visits the root URL ("/"), it should run the <code class="bg-slate-100 px-1 rounded">home()</code> function.</p>
+                        <p><strong>JSON Return:</strong> Notice we return a Python Dictionary. FastAPI automatically converts this to JSON for the browser.</p>
+                    </div>`,
+                terminal: "$ touch first_app.py\n$ # Open in your editor",
+                url: "localhost:8000",
+                browser: "...",
+                tip: "FastAPI converts dictionaries to JSON automatically!"
+            },
+            {
+                id: "run",
+                title: "4. Launch Server",
+                icon: "&#9889;",
+                intro: "Now we tell Uvicorn to run our application object. This step is critical for connecting your Python code to the network.",
+                content: `
+                    <div class="bg-slate-900 rounded-xl overflow-hidden mb-8">
+                        <div class="bg-slate-800 px-4 py-2 flex justify-between items-center">
+                            <span class="text-xs text-slate-400 mono">Terminal</span>
+                            <button onclick="copyCode(this, 'uv run uvicorn 02_fastapi_setup.first_app:app --reload')" class="text-[10px] bg-slate-700 hover:bg-slate-600 text-indigo-300 font-bold px-3 py-1 rounded transition-colors uppercase">Copy</button>
+                        </div>
+                        <div class="p-6 mono text-emerald-400 text-sm leading-relaxed">
+                            uv run uvicorn 02_fastapi_setup.first_app:app --reload
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 mb-8">
+                        <h4 class="font-bold text-indigo-900 mb-4 flex items-center gap-2">
+                            <span>&#128269;</span> Detailed Command Breakdown
+                        </h4>
+                        <div class="space-y-4">
+                            <div class="flex items-start gap-4 pb-3 border-b border-slate-100">
+                                <span class="mono bg-slate-100 px-2 py-1 rounded text-indigo-700 text-sm font-bold shrink-0">uv run</span>
+                                <p class="text-sm text-slate-600">Executes the command within the context of your project's managed environment.</p>
+                            </div>
+                            <div class="flex items-start gap-4 pb-3 border-b border-slate-100">
+                                <span class="mono bg-slate-100 px-2 py-1 rounded text-indigo-700 text-sm font-bold shrink-0">uvicorn</span>
+                                <p class="text-sm text-slate-600">The ASGI server engine that will listen for web requests.</p>
+                            </div>
+                            <div class="flex items-start gap-4 pb-3 border-b border-slate-100">
+                                <div class="flex flex-col shrink-0">
+                                    <span class="mono bg-slate-100 px-2 py-1 rounded text-indigo-700 text-xs font-bold">02_fastapi_setup.first_app:app</span>
+                                    <div class="mt-2 text-[10px] flex gap-2 mono uppercase text-slate-400">
+                                        <span>[Folder]</span>.<span>[File]</span>:<span>[Object]</span>
+                                    </div>
+                                </div>
+                                <p class="text-sm text-slate-600">Tells Uvicorn exactly where to find the <code class="bg-slate-50 px-1 rounded">FastAPI()</code> instance named 'app'.</p>
+                            </div>
+                            <div class="flex items-start gap-4">
+                                <span class="mono bg-slate-100 px-2 py-1 rounded text-indigo-700 text-sm font-bold shrink-0">--reload</span>
+                                <p class="text-sm text-slate-600">Automatically restarts the server when you save changes to your code.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200">
+                        <h4 class="text-center font-bold text-slate-800 mb-1">Execution Lifecycle Flow</h4>
+                        <p class="text-center text-xs text-slate-400 mb-6">What happens the moment you visit <span class="mono font-bold">http://127.0.0.1:8000</span></p>
+
+                        <div class="flex items-center mb-1">
+                            <span class="text-[9px] font-bold text-blue-500 uppercase w-16 shrink-0">Request</span>
+                            <div class="flex-1 flex items-center gap-0">
+                                <div class="bg-indigo-600 text-white rounded-xl px-4 py-3 text-center shadow-md w-28 shrink-0">
+                                    <div class="text-xl mb-0.5">&#127760;</div>
+                                    <div class="text-[11px] font-bold">BROWSER</div>
+                                    <div class="text-[9px] opacity-70">Client</div>
+                                </div>
+                                <div class="flex-1 flex flex-col items-center px-1">
+                                    <span class="text-[9px] font-bold text-blue-600 mb-0.5">GET /</span>
+                                    <div class="w-full flex items-center">
+                                        <div class="flex-1 h-0.5 bg-blue-400"></div>
+                                        <div class="text-blue-400 text-sm">&#9654;</div>
+                                    </div>
+                                </div>
+                                <div class="bg-slate-800 text-white rounded-xl px-4 py-3 text-center shadow-md w-28 shrink-0">
+                                    <div class="text-xl mb-0.5">&#9889;</div>
+                                    <div class="text-[11px] font-bold">UVICORN</div>
+                                    <div class="text-[9px] opacity-70">ASGI Server</div>
+                                </div>
+                                <div class="flex-1 flex flex-col items-center px-1">
+                                    <span class="text-[9px] font-bold text-blue-600 mb-0.5">Route</span>
+                                    <div class="w-full flex items-center">
+                                        <div class="flex-1 h-0.5 bg-blue-400"></div>
+                                        <div class="text-blue-400 text-sm">&#9654;</div>
+                                    </div>
+                                </div>
+                                <div class="bg-emerald-600 text-white rounded-xl px-4 py-3 text-center shadow-md w-28 shrink-0">
+                                    <div class="text-xl mb-0.5">&#128640;</div>
+                                    <div class="text-[11px] font-bold">FASTAPI</div>
+                                    <div class="text-[9px] opacity-70">Your App</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center mb-6">
+                            <span class="text-[9px] font-bold text-emerald-500 uppercase w-16 shrink-0">Response</span>
+                            <div class="flex-1 flex items-center gap-0">
+                                <div class="w-28 shrink-0"></div>
+                                <div class="flex-1 flex flex-col items-center px-1">
+                                    <div class="w-full flex items-center">
+                                        <div class="text-emerald-400 text-sm">&#9664;</div>
+                                        <div class="flex-1 h-0.5 bg-emerald-400"></div>
+                                    </div>
+                                    <span class="text-[9px] font-bold text-emerald-600 mt-0.5">JSON</span>
+                                </div>
+                                <div class="w-28 shrink-0"></div>
+                                <div class="flex-1 flex flex-col items-center px-1">
+                                    <div class="w-full flex items-center">
+                                        <div class="text-emerald-400 text-sm">&#9664;</div>
+                                        <div class="flex-1 h-0.5 bg-emerald-400"></div>
+                                    </div>
+                                    <span class="text-[9px] font-bold text-emerald-600 mt-0.5">dict → JSON</span>
+                                </div>
+                                <div class="w-28 shrink-0"></div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <div class="flex items-start gap-3 bg-white rounded-lg p-3 border border-slate-200">
+                                <span class="w-6 h-6 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center text-xs font-bold shrink-0">1</span>
+                                <p class="text-xs text-slate-600">Browser sends an HTTP <span class="mono font-bold text-indigo-600">GET /</span> request to the server.</p>
+                            </div>
+                            <div class="flex items-start gap-3 bg-white rounded-lg p-3 border border-slate-200">
+                                <span class="w-6 h-6 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center text-xs font-bold shrink-0">2</span>
+                                <p class="text-xs text-slate-600"><span class="font-bold">Uvicorn</span> listens on port 8000, receives the request, and hands it off to FastAPI.</p>
+                            </div>
+                            <div class="flex items-start gap-3 bg-white rounded-lg p-3 border border-slate-200">
+                                <span class="w-6 h-6 bg-indigo-100 text-indigo-700 rounded-full flex items-center justify-center text-xs font-bold shrink-0">3</span>
+                                <p class="text-xs text-slate-600"><span class="font-bold">FastAPI</span> matches the path <span class="mono font-bold text-indigo-600">/</span> to your <span class="mono font-bold text-indigo-600">home()</span> function and calls it.</p>
+                            </div>
+                            <div class="flex items-start gap-3 bg-white rounded-lg p-3 border border-slate-200">
+                                <span class="w-6 h-6 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center text-xs font-bold shrink-0">4</span>
+                                <p class="text-xs text-slate-600">Your function returns a Python <span class="mono font-bold text-emerald-700">dict</span> — FastAPI converts it to <span class="mono font-bold text-emerald-700">JSON</span> automatically.</p>
+                            </div>
+                            <div class="flex items-start gap-3 bg-white rounded-lg p-3 border border-slate-200">
+                                <span class="w-6 h-6 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center text-xs font-bold shrink-0">5</span>
+                                <p class="text-xs text-slate-600">Uvicorn sends the JSON back as an HTTP <span class="mono font-bold text-emerald-700">200 OK</span> response — the browser displays it.</p>
+                            </div>
+                        </div>
+                    </div>`,
+                terminal: "INFO:     Will watch for changes...\nINFO:     Uvicorn running on http://127.0.0.1:8000\nINFO:     Started reloader process",
+                url: "http://127.0.0.1:8000",
+                browser: "...",
+                tip: "The colon (:) separates the file name from the application variable."
+            },
+            {
+                id: "verify",
+                title: "5. Browser Test",
+                icon: "&#127757;",
+                intro: "Open your browser and navigate to the local host. You should see the response from your Python function.",
+                content: `
+                    <div class="browser-window border-2 border-indigo-100">
+                        <div class="bg-indigo-50 px-4 py-2 border-b border-indigo-100 flex items-center justify-between">
+                            <div class="font-bold text-indigo-900 text-sm">Chrome / Firefox / Safari</div>
+                            <div class="text-[10px] text-indigo-400 font-bold uppercase">127.0.0.1:8000</div>
+                        </div>
+                        <div class="p-12 text-center">
+                            <div class="mono text-2xl font-bold text-slate-800 bg-slate-50 p-6 rounded-lg inline-block border border-slate-200">
+                                {"message": "FastAPI server is running"}
+                            </div>
+                            <p class="mt-6 text-sm text-slate-500">Success! Your Python function just served its first web request.</p>
+                        </div>
+                    </div>`,
+                terminal: "INFO:     127.0.0.1:54321 - \"GET / HTTP/1.1\" 200 OK",
+                url: "http://127.0.0.1:8000",
+                browser: '{"message": "FastAPI server is running"}',
+                tip: "127.0.0.1 is your 'Loopback' address — it points back to your own machine."
+            },
+            {
+                id: "docs",
+                title: "6. Interactive Docs",
+                icon: "&#128214;",
+                intro: "One of FastAPI's superpowers is auto-generated documentation. Append <code class='bg-slate-100 px-1 rounded text-sm'>/docs</code> to your URL to see it in action.",
+                content: `
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div class="bg-slate-50 p-4 border-b flex justify-between items-center">
+                            <span class="font-bold text-slate-700">Swagger UI</span>
+                            <span class="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold">LIVE</span>
+                        </div>
+                        <div class="p-6 space-y-4">
+                            <div class="flex items-center gap-3 p-3 bg-slate-50 border rounded-lg">
+                                <span class="bg-emerald-500 text-white text-[10px] px-2 py-1 rounded font-bold">GET</span>
+                                <span class="mono text-sm">/</span>
+                                <span class="text-xs text-slate-400 ml-auto">Home endpoint</span>
+                            </div>
+                            <div class="flex items-center gap-3 p-3 bg-slate-50 border rounded-lg opacity-60">
+                                <span class="bg-emerald-500 text-white text-[10px] px-2 py-1 rounded font-bold">GET</span>
+                                <span class="mono text-sm">/about</span>
+                                <span class="text-xs text-slate-400 ml-auto">Project info</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-6 p-4 bg-amber-50 border-l-4 border-amber-400 text-sm text-amber-800">
+                        <strong>Why use /docs?</strong> You can test your ML models here without building a custom frontend. Just click "Try it out" and send parameters directly.
+                    </div>`,
+                terminal: "INFO:     127.0.0.1:54321 - \"GET /docs HTTP/1.1\" 200 OK\nINFO:     127.0.0.1:54321 - \"GET /openapi.json HTTP/1.1\" 200 OK",
+                url: "http://127.0.0.1:8000/docs",
+                browser: "[Swagger UI Loaded]",
+                tip: "The docs are generated from the OpenAPI standard."
+            },
+            {
+                id: "route",
+                title: "7. Second Route",
+                icon: "&#128739;",
+                intro: "Let's add more complexity. We can create as many 'routes' as we need for different features of our application.",
+                content: `
+                    <div class="bg-slate-900 rounded-xl overflow-hidden mb-6">
+                        <div class="bg-slate-800 px-4 py-2 flex justify-between items-center">
+                            <span class="text-xs text-slate-400 mono">first_app.py</span>
+                            <button onclick="copyCode(this, '@app.get(&quot;/about&quot;)\\ndef about():\\n    return {&quot;project&quot;: &quot;ML inference API&quot;}')" class="text-[10px] bg-slate-700 hover:bg-slate-600 text-indigo-300 font-bold px-3 py-1 rounded transition-colors uppercase">Copy</button>
+                        </div>
+                        <div class="p-6 mono text-sm leading-relaxed">
+                            <span class="text-indigo-400">@app.get</span>(<span class="text-emerald-400">"/about"</span>)<br>
+                            <span class="text-pink-400">def</span> <span class="text-amber-300">about</span>():<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-pink-400">return</span> {<span class="text-emerald-400">"project"</span>: <span class="text-emerald-400">"ML inference API"</span>}
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl border-2 border-dashed border-slate-200 text-center">
+                        <p class="text-slate-500 mb-2">Check the browser preview on the right!</p>
+                        <p class="text-xs text-slate-400">URL switched to: /about</p>
+                    </div>`,
+                terminal: "INFO:     StatReload detected changes...\nINFO:     Uvicorn running on http://127.0.0.1:8000",
+                url: "http://127.0.0.1:8000/about",
+                browser: '{\n  "project": "ML inference API using FastAPI"\n}',
+                tip: "Each function represents a new 'task' your API can perform."
+            }
+        ];
+
+        let currentStep = 0;
+        let sideTerminalTypeTimer = null;
+
+        // ── Render nav ─────────────────────────────────────────────────────
+        function renderNav() {
+            const nav = document.getElementById('step-nav');
+            nav.innerHTML = steps.map((s, i) => `
+                <button onclick="jumpToStep(${i})" class="w-full flex items-center gap-4 p-3 rounded-xl transition-all hover:bg-slate-50">
+                    <div class="step-node w-8 h-8 rounded-full flex items-center justify-center shrink-0 border-2 border-slate-200 font-bold text-xs
+                        ${i === currentStep ? 'active' : (i < currentStep ? 'complete' : '')}">
+                        ${i < currentStep ? '&#10003;' : i + 1}
+                    </div>
+                    <div class="text-left hidden md:block">
+                        <p class="text-sm font-bold ${i === currentStep ? 'text-indigo-600' : 'text-slate-500'}">${s.title}</p>
+                    </div>
+                </button>
+            `).join('');
+        }
+
+        // ── Update progress ────────────────────────────────────────────────
+        function updateProgress() {
+            const pct = Math.round(((currentStep + 1) / steps.length) * 100);
+            document.getElementById('progress-bar').style.width = `${pct}%`;
+            document.getElementById('progress-text').textContent = `${pct}% Complete`;
+        }
+
+        // ── Typewriter for side terminal ───────────────────────────────────
+        function typeTerminal(text) {
+            const el = document.getElementById('side-terminal');
+            el.textContent = '';
+            el.classList.add('tw-caret');
+            if (sideTerminalTypeTimer) clearTimeout(sideTerminalTypeTimer);
+            let i = 0;
+            function step() {
+                if (i < text.length) {
+                    el.textContent += text[i];
+                    i++;
+                    sideTerminalTypeTimer = setTimeout(step, 20);
+                } else {
+                    el.classList.remove('tw-caret');
+                }
+            }
+            step();
+        }
+
+        // ── Render content ─────────────────────────────────────────────────
+        function renderContent() {
+            const step = steps[currentStep];
+            const display = document.getElementById('content-display');
+
+            display.innerHTML = `
+                <div class="animate-fade-in">
+                    <div class="flex items-center gap-4 mb-6">
+                        <span class="text-5xl">${step.icon}</span>
+                        <h2 class="text-3xl font-extrabold text-slate-900">${step.title}</h2>
+                    </div>
+                    <p class="text-lg text-slate-600 leading-relaxed mb-8">${step.intro}</p>
+                    <div class="space-y-6">
+                        ${step.content}
+                    </div>
+                </div>`;
+
+            // Update side panel with typewriter
+            typeTerminal(step.terminal);
+            document.getElementById('browser-url').textContent = step.url;
+            document.getElementById('browser-content').textContent = step.browser;
+            document.getElementById('pro-tip').textContent = step.tip;
+
+            // Nav button states
+            const prevBtn = document.getElementById('btn-prev');
+            const nextBtn = document.getElementById('btn-next');
+            prevBtn.disabled = (currentStep === 0);
+            nextBtn.textContent = (currentStep === steps.length - 1) ? 'Finish Lab' : 'Continue to Next Step';
+
+            updateProgress();
+            renderNav();
+        }
+
+        // ── Green checkmark flash ──────────────────────────────────────────
+        function flashCheck(callback) {
+            const overlay = document.getElementById('check-overlay');
+            overlay.classList.remove('hide');
+            const icon = overlay.querySelector('.check-icon');
+            // Reset animation
+            icon.style.animation = 'none';
+            requestAnimationFrame(() => {
+                icon.style.animation = '';
+                setTimeout(() => {
+                    overlay.classList.add('hide');
+                    if (callback) callback();
+                }, 420);
+            });
+        }
+
+        // ── Change step ────────────────────────────────────────────────────
+        function changeStep(delta) {
+            const next = currentStep + delta;
+            if (next < 0 || next >= steps.length) return;
+
+            if (delta > 0) {
+                // Going forward: show checkmark flash first
+                flashCheck(() => {
+                    currentStep = next;
+                    renderContent();
+                    document.getElementById('main-area').scrollTo({ top: 0, behavior: 'smooth' });
+                });
+            } else {
+                currentStep = next;
+                renderContent();
+                document.getElementById('main-area').scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function jumpToStep(idx) {
+            currentStep = idx;
+            renderContent();
+            document.getElementById('main-area').scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function restartLab() {
+            currentStep = 0;
+            renderContent();
+            document.getElementById('main-area').scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // ── Copy code helper ───────────────────────────────────────────────
+        function copyCode(btn, text) {
+            // Decode any HTML entities for copy
+            const decoded = text.replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+            navigator.clipboard.writeText(decoded).then(() => {
+                const orig = btn.textContent;
+                btn.textContent = '\u2713 Copied';
+                btn.classList.add('bg-emerald-700','text-white');
+                setTimeout(() => {
+                    btn.textContent = orig;
+                    btn.classList.remove('bg-emerald-700','text-white');
+                }, 2000);
+            });
+        }
+
+        // ── Keyboard navigation ────────────────────────────────────────────
+        document.addEventListener('keydown', e => {
+            if (e.key === 'ArrowRight') changeStep(1);
+            if (e.key === 'ArrowLeft')  changeStep(-1);
+        });
+
+        // ── Init ───────────────────────────────────────────────────────────
+        window.onload = () => renderContent();
+    </script>
+</body>
+</html>

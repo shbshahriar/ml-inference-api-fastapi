@@ -9,7 +9,7 @@
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Fira+Code:wght@400;500&display=swap');
-        
+
         body {
             background-color: #fafaf9;
             color: #1e293b;
@@ -22,43 +22,81 @@
             position: relative;
             width: 100%;
             max-width: 700px;
-            margin-left: auto;
-            margin-right: auto;
+            margin: 0 auto;
             height: 350px;
             max-height: 400px;
         }
 
-        .tab-content { transition: opacity 0.3s ease-in-out; }
+        /* ── Section transitions ── */
+        .tab-content {
+            opacity: 0;
+            transform: translateY(14px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            pointer-events: none;
+        }
+        .tab-content.visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
         .hide { display: none !important; }
 
+        /* ── Nav active state ── */
+        .nav-link {
+            transition: all 0.2s ease;
+        }
         .nav-link.active {
             background-color: #ecfdf5;
             color: #059669;
-            border-right: 4px solid #059669;
+            border-left: 4px solid #059669;
+            font-weight: 700;
+        }
+        .nav-link:not(.active) {
+            border-left: 4px solid transparent;
         }
 
+        /* ── Terminal window ── */
         .terminal-window {
             background-color: #0f172a;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            height: 400px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+            min-height: 420px;
             overflow-y: auto;
         }
 
+        /* ── Waiter sim pulse ── */
         .waiter-sim-active {
-            animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+            animation: pulse-ring 1.5s cubic-bezier(0.215,0.61,0.355,1) infinite;
         }
 
         @keyframes pulse-ring {
-            0% { transform: scale(.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
-            100% { transform: scale(.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+            0%   { transform: scale(.95); box-shadow: 0 0 0 0   rgba(16,185,129,0.7); }
+            70%  { transform: scale(1);   box-shadow: 0 0 0 10px rgba(16,185,129,0); }
+            100% { transform: scale(.95); box-shadow: 0 0 0 0   rgba(16,185,129,0); }
+        }
+
+        /* ── Winner badge animation ── */
+        @keyframes pop-in {
+            0%   { transform: scale(0) rotate(-10deg); opacity: 0; }
+            70%  { transform: scale(1.15) rotate(2deg); opacity: 1; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+        .winner-badge {
+            animation: pop-in 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards;
+        }
+
+        /* ── Terminal typewriter caret ── */
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+        .tw-caret::after {
+            content: '_';
+            animation: blink 0.6s step-end infinite;
+            color: #34d399;
         }
     </style>
 </head>
 <body class="flex flex-col md:flex-row min-h-screen overflow-x-hidden">
 
-    <!-- Desktop Sidebar -->
-    <nav class="w-full md:w-72 bg-white border-r border-stone-200 flex flex-col h-auto md:h-screen sticky top-0 z-50">
+    <!-- Sidebar -->
+    <nav class="w-full md:w-72 bg-white border-r border-stone-200 flex flex-col h-auto md:h-screen md:sticky md:top-0 z-50">
         <div class="p-8">
             <div class="flex items-center gap-2 mb-2">
                 <div class="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">F</div>
@@ -68,52 +106,48 @@
         </div>
 
         <div class="flex-1 space-y-1 px-4 overflow-y-auto pb-8" id="nav-list">
-            <button onclick="showSection('sec-intro')" class="nav-link active w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold transition-all">
-                <span>🏠</span> Home & Foundations
+            <button class="nav-link active w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-slate-600 hover:bg-stone-50" data-index="0" onclick="showSection(0)">
+                <span>&#127968;</span> Home &amp; Foundations
             </button>
-            <button onclick="showSection('sec-perf')" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold text-slate-600 hover:bg-stone-50 transition-all">
-                <span>🚀</span> Performance Engine
+            <button class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-slate-600 hover:bg-stone-50" data-index="1" onclick="showSection(1)">
+                <span>&#128640;</span> Performance Engine
             </button>
-            <button onclick="showSection('sec-waiter')" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold text-slate-600 hover:bg-stone-50 transition-all">
-                <span>🍽️</span> Waiter Analogy (Async)
+            <button class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-slate-600 hover:bg-stone-50" data-index="2" onclick="showSection(2)">
+                <span>&#127869;</span> Waiter Analogy (Async)
             </button>
-            <button onclick="showSection('sec-dx')" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold text-slate-600 hover:bg-stone-50 transition-all">
-                <span>🛠️</span> Developer Experience
+            <button class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-slate-600 hover:bg-stone-50" data-index="3" onclick="showSection(3)">
+                <span>&#128736;</span> Developer Experience
             </button>
-            <button onclick="showSection('sec-lab')" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold text-slate-600 hover:bg-stone-50 transition-all">
-                <span>💻</span> Hands-on Setup
+            <button class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-slate-600 hover:bg-stone-50" data-index="4" onclick="showSection(4)">
+                <span>&#128187;</span> Hands-on Setup
             </button>
         </div>
 
-        <div class="p-6 border-t border-stone-100 mt-auto">
+        <div class="p-6 border-t border-stone-100">
             <div class="bg-slate-900 rounded-xl p-4 text-white">
                 <p class="text-[10px] uppercase text-slate-400 mb-1">Status</p>
                 <div class="flex items-center gap-2">
                     <div class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
-                    <span class="text-xs font-mono">uvicorn main:app</span>
+                    <span class="text-xs code-font">uvicorn main:app</span>
                 </div>
             </div>
+            <p class="text-center text-[11px] text-slate-400 mt-3">&#8592; &#8594; arrow keys to navigate</p>
         </div>
     </nav>
 
     <!-- Main Content -->
-    <main class="flex-1 overflow-y-auto">
-        
-        <!-- SECTION 1: INTRODUCTION -->
-        <section id="sec-intro" class="tab-content p-6 md:p-16 max-w-6xl mx-auto">
+    <main class="flex-1 overflow-y-auto" id="main-scroll">
+
+        <!-- SECTION 1: FOUNDATIONS -->
+        <section id="sec-intro" class="tab-content visible p-6 md:p-16 max-w-6xl mx-auto">
             <header class="mb-12">
-                <div class="bg-emerald-50 border-l-4 border-emerald-500 p-4 mb-6 rounded-r-lg">
-                    <p class="text-sm text-emerald-800">
-                        <strong>Context:</strong> This module introduces FastAPI's architectural roots. To understand why it's so efficient, we must first look at the two libraries that form its core: <strong>Starlette</strong> and <strong>Pydantic</strong>.
-                    </p>
-                </div>
                 <h2 class="text-4xl md:text-5xl font-black text-slate-900 mb-4">Core Foundations</h2>
                 <p class="text-xl text-slate-500 leading-relaxed max-w-3xl">FastAPI is a high-performance web framework for building APIs with Python. It isn't just one library; it's a powerful synergy of two giants.</p>
             </header>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-                <div class="group bg-white p-8 rounded-2xl shadow-sm border border-stone-200 hover:border-emerald-200 transition-all">
-                    <div class="w-12 h-12 bg-sky-100 rounded-xl flex items-center justify-center text-2xl mb-6">🌐</div>
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-stone-200 hover:border-emerald-200 transition-all">
+                    <div class="w-12 h-12 bg-sky-100 rounded-xl flex items-center justify-center text-2xl mb-6">&#127760;</div>
                     <h3 class="text-2xl font-bold text-slate-800 mb-4">Starlette</h3>
                     <p class="text-slate-600 leading-relaxed mb-6">The lightweight ASGI toolkit. It handles all the web parts: routing, request handling, and responses.</p>
                     <div class="bg-stone-50 p-4 rounded-lg border border-stone-100">
@@ -122,8 +156,8 @@
                     </div>
                 </div>
 
-                <div class="group bg-white p-8 rounded-2xl shadow-sm border border-stone-200 hover:border-emerald-200 transition-all">
-                    <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center text-2xl mb-6">🛡️</div>
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-stone-200 hover:border-emerald-200 transition-all">
+                    <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center text-2xl mb-6">&#128737;</div>
                     <h3 class="text-2xl font-bold text-slate-800 mb-4">Pydantic</h3>
                     <p class="text-slate-600 leading-relaxed mb-6">The data validation powerhouse. It uses Python type hints to enforce data structures.</p>
                     <div class="bg-stone-50 p-4 rounded-lg border border-stone-100">
@@ -137,11 +171,6 @@
         <!-- SECTION 2: PERFORMANCE -->
         <section id="sec-perf" class="tab-content hide p-6 md:p-16 max-w-6xl mx-auto">
             <header class="mb-12">
-                <div class="bg-emerald-50 border-l-4 border-emerald-500 p-4 mb-6 rounded-r-lg">
-                    <p class="text-sm text-emerald-800">
-                        <strong>Context:</strong> Performance is a key differentiator. This section quantifies the difference between the "Synchronous" world of Flask and the "Asynchronous" world of FastAPI using comparative data.
-                    </p>
-                </div>
                 <h2 class="text-4xl font-black text-slate-900 mb-4">The Performance Engine</h2>
                 <p class="text-xl text-slate-500 max-w-2xl">The shift from WSGI (Synchronous) to ASGI (Asynchronous) is what allows FastAPI to handle thousands of concurrent requests.</p>
             </header>
@@ -160,7 +189,7 @@
                         </div>
                         <div class="border-l-4 border-emerald-500 pl-6">
                             <h4 class="font-bold text-slate-800">FastAPI (ASGI)</h4>
-                            <p class="text-sm text-slate-500">Non-blocking. Uses the `async/await` syntax to handle many requests simultaneously while waiting for data.</p>
+                            <p class="text-sm text-slate-500">Non-blocking. Uses the <code>async/await</code> syntax to handle many requests simultaneously while waiting for data.</p>
                         </div>
                         <div class="bg-emerald-600 p-4 rounded-xl text-white">
                             <p class="text-xs font-bold uppercase opacity-80">Insight</p>
@@ -171,14 +200,9 @@
             </div>
         </section>
 
-        <!-- SECTION 3: THE WAITER -->
+        <!-- SECTION 3: WAITER ANALOGY -->
         <section id="sec-waiter" class="tab-content hide p-6 md:p-16 max-w-6xl mx-auto">
             <header class="mb-12">
-                <div class="bg-emerald-50 border-l-4 border-emerald-500 p-4 mb-6 rounded-r-lg">
-                    <p class="text-sm text-emerald-800">
-                        <strong>Context:</strong> Asynchronous programming is often hard to visualize. This simulator demonstrates the "Restaurant Waiter" analogy used in the report to explain blocking vs non-blocking logic.
-                    </p>
-                </div>
                 <h2 class="text-4xl font-black text-slate-900 mb-4">Concurrency: The Waiter Analogy</h2>
                 <p class="text-lg text-slate-600 mb-10">See how much more efficient a "Non-Blocking" waiter is compared to a "Blocking" one.</p>
             </header>
@@ -188,28 +212,39 @@
                 <div class="bg-white rounded-2xl p-6 border border-stone-200 shadow-sm">
                     <h3 class="font-bold text-slate-800 mb-4">Synchronous (Blocking)</h3>
                     <div class="h-40 bg-stone-50 rounded-xl relative overflow-hidden flex items-center justify-around border border-dashed border-stone-300">
-                        <div id="sync-table-1" class="w-12 h-12 bg-slate-200 rounded-full flex items-center justify-center text-xl">🪑</div>
-                        <div id="sync-waiter" class="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center text-xl transition-all duration-500">🤵</div>
-                        <div id="sync-table-2" class="w-12 h-12 bg-slate-200 rounded-full flex items-center justify-center text-xl">🪑</div>
+                        <div id="sync-table-1" class="w-12 h-12 bg-slate-200 rounded-full flex items-center justify-center text-xl">&#129681;</div>
+                        <div id="sync-waiter" class="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center text-xl transition-all duration-500">&#129333;</div>
+                        <div id="sync-table-2" class="w-12 h-12 bg-slate-200 rounded-full flex items-center justify-center text-xl">&#129681;</div>
                     </div>
                     <p class="text-xs text-slate-500 mt-4">The waiter stands at Table 1 until the food is ready, ignoring Table 2.</p>
-                    <button onclick="runSyncSim()" class="mt-4 w-full py-2 bg-slate-200 text-slate-700 font-bold rounded-lg hover:bg-slate-300">Run Sync Demo</button>
+                    <button onclick="runSyncSim()" class="mt-4 w-full py-2 bg-slate-200 text-slate-700 font-bold rounded-lg hover:bg-slate-300 transition-colors">Run Sync Demo</button>
+                    <!-- Sync counter -->
+                    <div class="mt-4 flex items-center justify-between bg-slate-50 rounded-lg px-4 py-2 border border-slate-200">
+                        <span class="text-xs font-bold text-slate-500">Sync: <span id="sync-counter" class="text-slate-800">0</span> requests served</span>
+                    </div>
                 </div>
 
                 <!-- Async Simulation -->
                 <div class="bg-white rounded-2xl p-6 border border-emerald-200 shadow-md">
-                    <h3 class="font-bold text-emerald-800 mb-4">Asynchronous (Non-Blocking)</h3>
+                    <div class="flex items-center gap-3 mb-4">
+                        <h3 class="font-bold text-emerald-800">Asynchronous (Non-Blocking)</h3>
+                        <span id="winner-badge" class="hide bg-amber-400 text-amber-900 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wide winner-badge">Winner!</span>
+                    </div>
                     <div class="h-40 bg-emerald-50 rounded-xl relative overflow-hidden flex items-center justify-around border border-dashed border-emerald-200">
-                        <div id="async-table-1" class="w-12 h-12 bg-emerald-200 rounded-full flex items-center justify-center text-xl">🪑</div>
-                        <div id="async-waiter" class="w-12 h-12 bg-emerald-600 rounded-full flex items-center justify-center text-xl transition-all duration-500 text-white">🤵</div>
-                        <div id="async-table-2" class="w-12 h-12 bg-emerald-200 rounded-full flex items-center justify-center text-xl">🪑</div>
+                        <div id="async-table-1" class="w-12 h-12 bg-emerald-200 rounded-full flex items-center justify-center text-xl">&#129681;</div>
+                        <div id="async-waiter" class="w-12 h-12 bg-emerald-600 rounded-full flex items-center justify-center text-xl transition-all duration-500 text-white">&#129333;</div>
+                        <div id="async-table-2" class="w-12 h-12 bg-emerald-200 rounded-full flex items-center justify-center text-xl">&#129681;</div>
                     </div>
                     <p class="text-xs text-emerald-700 mt-4">The waiter takes an order, alerts the kitchen, then moves to help Table 2 immediately.</p>
-                    <button onclick="runAsyncSim()" class="mt-4 w-full py-2 bg-emerald-600 text-white font-bold rounded-lg hover:bg-emerald-700">Run Async Demo</button>
+                    <button onclick="runAsyncSim()" class="mt-4 w-full py-2 bg-emerald-600 text-white font-bold rounded-lg hover:bg-emerald-700 transition-colors">Run Async Demo</button>
+                    <!-- Async counter -->
+                    <div class="mt-4 flex items-center justify-between bg-emerald-50 rounded-lg px-4 py-2 border border-emerald-200">
+                        <span class="text-xs font-bold text-emerald-700">Async: <span id="async-counter" class="text-emerald-900">0</span> requests served</span>
+                    </div>
                 </div>
             </div>
-            
-            <div id="sim-status" class="mt-8 p-4 text-center text-lg font-mono text-slate-600 bg-stone-100 rounded-lg">
+
+            <div id="sim-status" class="mt-8 p-4 text-center text-base font-mono text-slate-600 bg-stone-100 rounded-lg">
                 Click a button above to start simulation...
             </div>
         </section>
@@ -217,30 +252,29 @@
         <!-- SECTION 4: DEVELOPER EXPERIENCE -->
         <section id="sec-dx" class="tab-content hide p-6 md:p-16 max-w-6xl mx-auto">
             <header class="mb-12">
-                <div class="bg-emerald-50 border-l-4 border-emerald-500 p-4 mb-6 rounded-r-lg">
-                    <p class="text-sm text-emerald-800">
-                        <strong>Context:</strong> "Fast to Code" refers to how FastAPI reduces developer effort. This section mocks the automatic interactive documentation feature mentioned in the video.
-                    </p>
-                </div>
                 <h2 class="text-4xl font-black text-slate-900 mb-4">Fast to Code: Auto-Docs</h2>
-                <p class="text-lg text-slate-600 mb-10">FastAPI reads your type hints and automatically creates a live API sandbox at `/docs`.</p>
+                <p class="text-lg text-slate-600 mb-10">FastAPI reads your type hints and automatically creates a live API sandbox at <code class="bg-slate-100 px-1 rounded">/docs</code>.</p>
             </header>
 
             <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                <!-- Code block with copy button -->
                 <div class="bg-slate-900 rounded-2xl overflow-hidden shadow-2xl">
-                    <div class="bg-slate-800 px-4 py-2 flex gap-2">
-                        <div class="w-3 h-3 rounded-full bg-red-500"></div>
-                        <div class="w-3 h-3 rounded-full bg-amber-500"></div>
-                        <div class="w-3 h-3 rounded-full bg-emerald-500"></div>
-                        <span class="ml-4 text-xs text-slate-400 font-mono">main.py</span>
+                    <div class="bg-slate-800 px-4 py-2 flex items-center justify-between">
+                        <div class="flex gap-2">
+                            <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                            <div class="w-3 h-3 rounded-full bg-amber-500"></div>
+                            <div class="w-3 h-3 rounded-full bg-emerald-500"></div>
+                        </div>
+                        <span class="ml-4 text-xs text-slate-400 code-font">main.py</span>
+                        <button id="dx-copy-btn" onclick="copyDxCode()" class="ml-auto text-[11px] bg-slate-700 hover:bg-slate-600 text-slate-300 px-3 py-1 rounded transition-colors">Copy</button>
                     </div>
-                    <div class="p-6 code-font text-sky-300 text-sm md:text-base whitespace-pre overflow-x-auto">
-<span class="text-pink-400">@app.get</span>(<span class="text-emerald-300">"/predict"</span>)
+                    <div class="p-6 code-font text-sky-300 text-sm md:text-base whitespace-pre overflow-x-auto" id="dx-code-block"><span class="text-pink-400">@app.get</span>(<span class="text-emerald-300">"/predict"</span>)
 <span class="text-pink-400">async def</span> <span class="text-amber-300">get_prediction</span>(text: str):
     <span class="text-slate-500"># Your ML logic here</span>
     return {<span class="text-emerald-300">"result"</span>: <span class="text-emerald-300">"Spam"</span>}</div>
                 </div>
 
+                <!-- Swagger mock -->
                 <div class="bg-white border border-stone-200 rounded-2xl shadow-sm flex flex-col">
                     <div class="p-4 bg-stone-50 border-b border-stone-200 font-bold text-slate-800 flex justify-between">
                         <span>Interactive Swagger Docs</span>
@@ -251,17 +285,17 @@
                             <div class="bg-emerald-50 p-3 flex items-center justify-between cursor-pointer" onclick="toggleEndpoint()">
                                 <div class="flex items-center gap-3">
                                     <span class="bg-emerald-500 text-white text-[10px] px-2 py-1 rounded font-bold">GET</span>
-                                    <span class="font-mono text-sm text-slate-700">/predict</span>
+                                    <span class="code-font text-sm text-slate-700">/predict</span>
                                 </div>
-                                <span id="chevron" class="transition-transform rotate-0">▼</span>
+                                <span id="chevron" class="transition-transform">&#9660;</span>
                             </div>
                             <div id="endpoint-detail" class="hide p-4 bg-white border-t border-emerald-50">
                                 <p class="text-xs font-bold text-slate-400 uppercase mb-2">Parameters</p>
                                 <div class="flex items-center gap-4 mb-4">
-                                    <label class="text-sm font-mono">text:</label>
+                                    <label class="text-sm code-font">text:</label>
                                     <input type="text" value="Buy cheap pills!" class="border border-stone-300 rounded px-2 py-1 text-sm w-full">
                                 </div>
-                                <button class="bg-emerald-600 text-white px-4 py-1 rounded text-sm font-bold shadow-sm">Try it out</button>
+                                <button class="bg-emerald-600 text-white px-4 py-1 rounded text-sm font-bold shadow-sm hover:bg-emerald-700 transition-colors">Try it out</button>
                             </div>
                         </div>
                     </div>
@@ -269,36 +303,28 @@
             </div>
         </section>
 
-        <!-- SECTION 5: HANDS-ON LAB -->
+        <!-- SECTION 5: LAB -->
         <section id="sec-lab" class="tab-content hide p-6 md:p-16 max-w-6xl mx-auto">
             <header class="mb-12">
-                <div class="bg-emerald-50 border-l-4 border-emerald-500 p-4 mb-6 rounded-r-lg">
-                    <p class="text-sm text-emerald-800">
-                        <strong>Context:</strong> This interactive lab mimics the terminal commands from the video's conclusion, showing the user exactly how to set up their environment and run their first API.
-                    </p>
-                </div>
                 <h2 class="text-4xl font-black text-slate-900 mb-4">Terminal Lab: Quick Start</h2>
-                <p class="text-lg text-slate-600 mb-10">Follow the steps to deploy your local FastAPI server.</p>
+                <p class="text-lg text-slate-600 mb-10">Follow the steps to deploy your local FastAPI server using <strong>uv</strong>.</p>
             </header>
 
             <div class="terminal-window rounded-2xl overflow-hidden">
                 <div class="bg-slate-800 px-4 py-3 flex items-center gap-4">
                     <div class="flex gap-1.5">
-                        <div class="w-3 h-3 rounded-full bg-slate-600"></div>
-                        <div class="w-3 h-3 rounded-full bg-slate-600"></div>
-                        <div class="w-3 h-3 rounded-full bg-slate-600"></div>
+                        <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                        <div class="w-3 h-3 rounded-full bg-amber-500"></div>
+                        <div class="w-3 h-3 rounded-full bg-emerald-500"></div>
                     </div>
-                    <span class="text-xs text-slate-400 font-mono tracking-widest">bash — 80x24</span>
+                    <span class="text-xs text-slate-400 code-font tracking-widest">bash</span>
                 </div>
                 <div class="p-8 code-font text-white min-h-[300px]" id="terminal-content">
-                    <div class="mb-4 text-slate-400 font-bold" id="step-desc">Step 1: Create Virtual Environment</div>
-                    <div id="step-commands">
-                        <div class="text-emerald-400">python -m venv venv</div>
-                        <div class="text-emerald-400 mt-1">source venv/bin/activate</div>
-                    </div>
+                    <div class="mb-4 text-slate-400 font-bold" id="step-desc">Click "Next Command" to begin the lab.</div>
+                    <div id="step-commands" class="tw-caret"></div>
                 </div>
                 <div class="p-6 bg-slate-800/50 flex justify-between items-center">
-                    <span id="step-count" class="text-slate-400 text-sm">Step 1 of 3</span>
+                    <span id="step-count" class="text-slate-400 text-sm">Step 0 of 3</span>
                     <button onclick="nextLabStep()" id="lab-btn" class="bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold px-6 py-2 rounded-full transition-colors">
                         Next Command
                     </button>
@@ -309,34 +335,62 @@
     </main>
 
     <script>
-        // NAVIGATION LOGIC
-        function showSection(sectionId) {
-            document.querySelectorAll('.tab-content').forEach(s => s.classList.add('hide'));
-            document.getElementById(sectionId).classList.remove('hide');
-            
-            document.querySelectorAll('.nav-link').forEach(l => {
-                l.classList.remove('active');
-                l.classList.add('text-slate-600');
-            });
-            
-            // Find the clicked button and activate it
-            const activeBtn = Array.from(document.querySelectorAll('.nav-link')).find(btn => 
-                btn.getAttribute('onclick').includes(sectionId)
-            );
-            if (activeBtn) {
-                activeBtn.classList.add('active');
-                activeBtn.classList.remove('text-slate-600');
-            }
+        // ── Section IDs in order ────────────────────────────────────────────
+        const SECTIONS = ['sec-intro','sec-perf','sec-waiter','sec-dx','sec-lab'];
+        let currentIdx = 0;
+        let perfChartInst = null;
 
-            if(sectionId === 'sec-perf') initChart();
+        function showSection(idx) {
+            if (idx < 0 || idx >= SECTIONS.length) return;
+
+            // Hide current
+            const prev = document.getElementById(SECTIONS[currentIdx]);
+            prev.classList.remove('visible');
+            setTimeout(() => prev.classList.add('hide'), 300);
+
+            currentIdx = idx;
+
+            // Show new
+            setTimeout(() => {
+                const next = document.getElementById(SECTIONS[currentIdx]);
+                next.classList.remove('hide');
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => next.classList.add('visible'));
+                });
+            }, 60);
+
+            // Update nav links
+            document.querySelectorAll('.nav-link').forEach((btn, i) => {
+                btn.classList.toggle('active', i === currentIdx);
+                if (i !== currentIdx) {
+                    btn.classList.remove('active');
+                    btn.classList.add('text-slate-600');
+                } else {
+                    btn.classList.remove('text-slate-600');
+                }
+            });
+
+            // Scroll to top
+            document.getElementById('main-scroll').scrollTo({ top: 0, behavior: 'smooth' });
+
+            // Lazy init chart
+            if (SECTIONS[currentIdx] === 'sec-perf') initPerfChart();
+
+            // Reset lab if going to lab section
+            if (SECTIONS[currentIdx] === 'sec-lab') resetLab();
         }
 
-        // CHART LOGIC
-        let perfChart = null;
-        function initChart() {
-            if(perfChart) return;
+        // ── Keyboard navigation ─────────────────────────────────────────────
+        document.addEventListener('keydown', e => {
+            if (e.key === 'ArrowRight') showSection(currentIdx + 1);
+            if (e.key === 'ArrowLeft')  showSection(currentIdx - 1);
+        });
+
+        // ── Performance Chart ───────────────────────────────────────────────
+        function initPerfChart() {
+            if (perfChartInst) return;
             const ctx = document.getElementById('performanceChart').getContext('2d');
-            perfChart = new Chart(ctx, {
+            perfChartInst = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: ['Single Connection', '100 Concurrent', '1000 Concurrent'],
@@ -358,51 +412,85 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    animation: { duration: 1500, easing: 'easeInOutQuart' },
                     plugins: {
                         legend: { position: 'bottom' },
                         title: { display: true, text: 'Throughput Efficiency (%)' }
                     },
-                    scales: {
-                        y: { beginAtZero: true, max: 100 }
-                    }
+                    scales: { y: { beginAtZero: true, max: 110 } }
                 }
             });
         }
 
-        // WAITER SIMULATION LOGIC
+        // ── Waiter simulation ───────────────────────────────────────────────
+        let syncCount  = 0;
+        let asyncCount = 0;
+        let asyncRanOnce = false;
+
         function runSyncSim() {
             const waiter = document.getElementById('sync-waiter');
             const status = document.getElementById('sim-status');
             const t1 = document.getElementById('sync-table-1');
-            
-            status.innerText = "Order taken at Table 1. Waiter is BLOCKING...";
+
+            status.textContent = "Order taken at Table 1. Waiter is BLOCKING...";
             waiter.style.transform = "translateX(-80px)";
             t1.classList.add('waiter-sim-active');
-            
+
             setTimeout(() => {
-                status.innerText = "Food ready for Table 1. Finally moving to Table 2...";
+                status.textContent = "Food ready for Table 1. Finally moving to Table 2...";
                 waiter.style.transform = "translateX(80px)";
                 t1.classList.remove('waiter-sim-active');
+                syncCount += 1;
+                document.getElementById('sync-counter').textContent = syncCount;
             }, 3000);
         }
 
         function runAsyncSim() {
             const waiter = document.getElementById('async-waiter');
             const status = document.getElementById('sim-status');
-            const t1 = document.getElementById('async-table-1');
             const t2 = document.getElementById('async-table-2');
-            
-            status.innerText = "Order taken at Table 1. Kitchen is working. Waiter moves on!";
+
+            status.textContent = "Order taken at Table 1. Kitchen is working. Waiter moves on!";
             waiter.style.transform = "translateX(-80px)";
-            
+
             setTimeout(() => {
                 waiter.style.transform = "translateX(80px)";
-                status.innerText = "Waiter serving Table 2 while Table 1's food cooks in background.";
+                status.textContent = "Waiter serving Table 2 while Table 1's food cooks in background.";
                 t2.classList.add('waiter-sim-active');
+
+                setTimeout(() => {
+                    asyncCount += 2;
+                    document.getElementById('async-counter').textContent = asyncCount;
+                    t2.classList.remove('waiter-sim-active');
+
+                    if (!asyncRanOnce) {
+                        asyncRanOnce = true;
+                        const badge = document.getElementById('winner-badge');
+                        badge.classList.remove('hide');
+                        // re-trigger animation
+                        badge.style.animation = 'none';
+                        requestAnimationFrame(() => {
+                            badge.style.animation = '';
+                        });
+                    }
+                }, 1500);
             }, 800);
         }
 
-        // DOCS LOGIC
+        // ── Developer Experience - copy code ────────────────────────────────
+        function copyDxCode() {
+            const code = `@app.get("/predict")\nasync def get_prediction(text: str):\n    # Your ML logic here\n    return {"result": "Spam"}`;
+            navigator.clipboard.writeText(code).then(() => {
+                const btn = document.getElementById('dx-copy-btn');
+                btn.textContent = 'Copied!';
+                btn.classList.add('bg-emerald-700','text-white');
+                setTimeout(() => {
+                    btn.textContent = 'Copy';
+                    btn.classList.remove('bg-emerald-700','text-white');
+                }, 2000);
+            });
+        }
+
         function toggleEndpoint() {
             const detail = document.getElementById('endpoint-detail');
             const chev = document.getElementById('chevron');
@@ -410,56 +498,111 @@
             chev.style.transform = detail.classList.contains('hide') ? 'rotate(0deg)' : 'rotate(180deg)';
         }
 
-        // LAB LOGIC - FIXED AS PER USER REQUEST
-        let currentStepIdx = 0;
+        // ── Terminal Lab with typewriter ─────────────────────────────────────
         const labSteps = [
             {
-                title: "Step 1: Create & Activate Virtual Environment",
-                commands: `<div class="text-emerald-400">python -m venv venv</div>
-                           <div class="text-emerald-400 mt-1">source venv/bin/activate</div>`,
-                label: "Step 1 of 3",
-                btnText: "Next Command"
+                title: "Step 1: Install FastAPI",
+                commands: ["uv add fastapi"]
             },
             {
-                title: "Step 2: Install Libraries",
-                commands: `<div class="text-emerald-400">pip install fastapi uvicorn</div>`,
-                label: "Step 2 of 3",
-                btnText: "Next Command"
+                title: "Step 2: Install Uvicorn",
+                commands: ["uv add uvicorn", "\u2713 Installed uvicorn (ASGI server)"]
             },
             {
                 title: "Step 3: Run the Application",
-                commands: `<div class="text-emerald-400">uvicorn main:app --reload</div>
-                           <div class="text-sky-400 mt-4">INFO:     Will watch for changes in these directories...</div>
-                           <div class="text-sky-400">INFO:     Uvicorn running on http://127.0.0.1:8000</div>`,
-                label: "Complete! 🚀",
-                btnText: "Restart Lab"
+                commands: [
+                    "uv run uvicorn main:app --reload",
+                    "INFO:     Will watch for changes in these directories...",
+                    "INFO:     Uvicorn running on http://127.0.0.1:8000",
+                    "INFO:     Started reloader process"
+                ]
             }
         ];
 
-        function nextLabStep() {
-            const desc = document.getElementById('step-desc');
+        let currentStepIdx = -1;
+        let allRenderedLines = [];
+        let isTyping = false;
+
+        function resetLab() {
+            currentStepIdx = -1;
+            allRenderedLines = [];
+            isTyping = false;
             const commands = document.getElementById('step-commands');
-            const countLabel = document.getElementById('step-count');
-            const btn = document.getElementById('lab-btn');
+            commands.innerHTML = '';
+            commands.className = 'tw-caret';
+            document.getElementById('step-desc').textContent = 'Click "Next Command" to begin the lab.';
+            document.getElementById('step-count').textContent = 'Step 0 of 3';
+            document.getElementById('lab-btn').textContent = 'Next Command';
+        }
+
+        function typeText(el, text, speed, callback) {
+            let i = 0;
+            el.classList.add('tw-caret');
+            function step() {
+                if (i < text.length) {
+                    el.textContent += text[i];
+                    i++;
+                    setTimeout(step, speed);
+                } else {
+                    el.classList.remove('tw-caret');
+                    if (callback) callback();
+                }
+            }
+            step();
+        }
+
+        function nextLabStep() {
+            if (isTyping) return;
+            currentStepIdx++;
 
             if (currentStepIdx >= labSteps.length) {
-                // Reset Logic
-                currentStepIdx = 0;
-                commands.innerHTML = ""; // Clear existing lines
+                resetLab();
+                return;
             }
 
             const step = labSteps[currentStepIdx];
-            desc.innerText = step.title;
-            commands.innerHTML += `<div class="mt-4 opacity-50 border-t border-slate-700 pt-2"></div>` + step.commands;
-            countLabel.innerText = step.label;
-            btn.innerText = step.btnText;
+            const commands = document.getElementById('step-commands');
+            document.getElementById('step-desc').textContent = step.title;
+            document.getElementById('step-count').textContent = `Step ${currentStepIdx + 1} of ${labSteps.length}`;
+            document.getElementById('lab-btn').textContent = currentStepIdx === labSteps.length - 1 ? 'Restart Lab' : 'Next Command';
 
-            currentStepIdx++;
+            if (currentStepIdx > 0) {
+                const divider = document.createElement('div');
+                divider.className = 'my-3 border-t border-slate-700 opacity-40';
+                commands.appendChild(divider);
+            }
 
-            // Auto scroll terminal
-            const win = document.querySelector('.terminal-window');
-            win.scrollTo({ top: win.scrollHeight, behavior: 'smooth' });
+            isTyping = true;
+            let lineIdx = 0;
+
+            function typeNextLine() {
+                if (lineIdx >= step.commands.length) {
+                    isTyping = false;
+                    const tw = document.querySelector('.terminal-window');
+                    if (tw) tw.scrollTo({ top: tw.scrollHeight, behavior: 'smooth' });
+                    return;
+                }
+                const lineText = step.commands[lineIdx];
+                const lineEl = document.createElement('div');
+                const isOutput = lineIdx > 0;
+                lineEl.className = isOutput ? 'text-sky-400 mt-1' : 'text-emerald-400 mt-1';
+                if (!isOutput) lineEl.textContent = '$ ';
+                commands.appendChild(lineEl);
+
+                const target = document.createElement('span');
+                lineEl.appendChild(target);
+
+                typeText(target, lineText, 30, () => {
+                    lineIdx++;
+                    setTimeout(typeNextLine, isOutput ? 80 : 150);
+                });
+            }
+
+            typeNextLine();
         }
+
+        // Init first section
+        document.getElementById('sec-intro').classList.add('visible');
     </script>
 </body>
 </html>

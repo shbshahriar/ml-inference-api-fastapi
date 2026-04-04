@@ -1,214 +1,73 @@
-# claude.md
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview
 
-This project follows the CampusX FastAPI for Machine Learning deployment curriculum.
+Structured learning repository following the CampusX FastAPI for Machine Learning curriculum. Content is organized into 11 numbered topic folders, each containing Python scripts, interactive HTML guides, and markdown notes.
 
-Claude must generate explanations and code strictly limited to the following topics:
+## Environment & Commands
 
-1. What is an API
-2. FastAPI philosophy and setup
-3. HTTP methods in FastAPI
-4. Path parameters and query parameters
-5. POST request handling
-6. PUT and DELETE requests
-7. Serving machine learning models with FastAPI
-8. Improving FastAPI APIs
-9. Docker for machine learning
-10. Dockerizing FastAPI applications
-11. Deploying FastAPI APIs on AWS
+This project uses **uv** exclusively — never use `pip`.
 
-Pydantic explanations must not be included unless explicitly requested.
-
-Package installation must use uv instead of pip.
-
-Do not introduce additional frameworks or topics outside this curriculum.
-
----
-
-## Environment Setup Rules
-
-Claude must use:
-
+```bash
+# Add dependencies
 uv add fastapi
 uv add uvicorn
 
-Do not use pip.
+# Run dev server (from project root)
+uv run uvicorn 02_fastapi_setup.first_app:app --reload
 
-Server execution must use:
-
-uv run uvicorn main:app --reload
-
----
-
-## API Fundamentals
-
-Claude should explain:
-
-- what an API is
-- how clients communicate with servers
-- request–response cycle basics
-- role of APIs in machine learning deployment
-
-Examples must remain beginner-friendly and practical.
-
----
-
-## FastAPI Setup and Philosophy
-
-Claude should demonstrate:
-
-- creating a FastAPI application
-- running a FastAPI server
-- defining basic routes
-- returning JSON responses
-
-Example structure:
-
-@app.get("/")
-def home():
-    return {"message": "Hello World"}
-
-Avoid introducing alternative backend frameworks.
-
----
-
-## HTTP Methods in FastAPI
-
-Claude should support usage of:
-
-GET → retrieve data  
-POST → create predictions  
-PUT → update data  
-DELETE → remove data
-
-Examples must follow REST-style usage.
-
----
-
-## Path and Query Parameters
-
-Claude should demonstrate:
-
-path parameter example:
-
-/predict/123
-
-query parameter example:
-
-/predict?age=25
-
-Explain when to use each type.
-
----
-
-## POST Request Handling
-
-Claude should demonstrate:
-
-- request body handling
-- sending JSON input
-- receiving structured prediction data
-- returning JSON output
-
-Prediction-style endpoint example:
-
-@app.post("/predict")
-
-Return format example:
-
-{"prediction": result}
-
----
-
-## PUT and DELETE Requests
-
-Claude should demonstrate:
-
-PUT request usage for updating resources
-
-DELETE request usage for removing resources
-
-Examples must remain simple and API-focused.
-
----
-
-## Serving Machine Learning Models
-
-Claude should demonstrate:
-
-- loading trained models
-- using pickle
-- using joblib
-- running model.predict()
-- returning prediction responses
-
-Prediction workflow:
-
-Receive request → prepare input → run prediction → return JSON result
-
-Do not introduce alternative serialization tools.
-
----
-
-## Improving FastAPI APIs
-
-Claude should support:
-
-clean route structure
-
-clear response formatting
-
-organized endpoint logic
-
-readable API design
-
-Avoid introducing unrelated optimization frameworks.
-
----
-
-## Docker for Machine Learning
-
-Claude should demonstrate:
-
-creating Dockerfile
-
-building Docker image
-
-running container locally
-
-Example commands:
-
-docker build -t ml-api
-
-docker run -p 8000:8000 ml-api
-
-No advanced Docker orchestration topics allowed.
-
----
-
-## Dockerizing FastAPI Applications
-
-Claude should demonstrate:
-
-containerizing FastAPI apps
-
-running FastAPI inside Docker
-
-exposing API ports correctly
-
-Examples must remain beginner-friendly.
-
----
-
-## Deploying FastAPI APIs on AWS
-
-Claude should explain:
-
-basic FastAPI deployment workflow on AWS
-
-running production server using:
-
+# Run production server
 uv run uvicorn main:app --host 0.0.0.0 --port 8000
+```
 
-Avoid introducing infrastructure automation tools.
+- Python: **3.13** (pinned in `.python-version`)
+- Core deps: `fastapi>=0.135.3`, `uvicorn>=0.43.0`, `pydantic>=2.12.5`
+- uv manages `.venv/` automatically
+
+### Uvicorn module path convention
+
+When the app file is inside a subfolder, use dot-notation:
+
+```bash
+uv run uvicorn 02_fastapi_setup.first_app:app --reload
+#               [folder].[file]:[FastAPI object]
+```
+
+## Folder Structure
+
+| Folder | Topic |
+|--------|-------|
+| `01_what_is_api/` | What is an API — interactive HTML guides |
+| `02_fastapi_setup/` | Install, first app (`first_app.py`), server commands |
+| `03_http_methods/` | GET, POST, PUT, DELETE |
+| `04_path_query_params/` | Path and query parameters |
+| `05_post_requests/` | POST request body handling |
+| `06_put_delete_requests/` | PUT and DELETE |
+| `07_serving_ml_models/` | Load model → predict → return JSON; saved models go in `models/` |
+| `08_improving_apis/` | Route structure, response formatting |
+| `09_docker_for_ml/` | Dockerfile, `docker build`, `docker run` |
+| `10_dockerizing_fastapi/` | Containerizing FastAPI |
+| `11_deploying_on_aws/` | AWS deployment |
+
+`main.py` at the root is a stub. Working app files live inside topic folders.
+
+## Curriculum Constraints
+
+- **Pydantic**: do not explain unless explicitly requested.
+- **ML projects**: only Iris Classification, House Price Prediction, Insurance Cost Prediction, Customer Churn Prediction.
+- **Model serialization**: only `pickle` or `joblib`.
+- **Docker**: only Dockerfile creation, `docker build`, `docker run` — no orchestration.
+- **Deployment targets**: Render, Railway, Heroku, AWS, GCP, Azure.
+- Do not introduce frameworks or topics outside this curriculum.
+
+## Interactive HTML Guides
+
+`01_what_is_api/` and `02_fastapi_setup/` contain self-contained single-page HTML learning guides (Tailwind CSS CDN + Chart.js). When creating or modifying them:
+
+- Typewriter effects for terminal/code output
+- Copy-to-clipboard buttons on all code blocks
+- Keyboard navigation (← → arrow keys) between steps/sections
+- Prefer HTML/CSS flow diagrams over canvas-based charts
+- No SVG graphics, no Mermaid JS
