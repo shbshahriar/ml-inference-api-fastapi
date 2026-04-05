@@ -1,27 +1,20 @@
 from fastapi import FastAPI, HTTPException, Path, Query
 from pathlib import Path as filePath
-from pydantic import BaseModel,Field, computed_field
-from typing import Optional,Annotated
+from pydantic import BaseModel, Field, computed_field
+from typing import Annotated, Literal
 import json
 
 app = FastAPI()
 
 class Patient(BaseModel):
-    id: Annotated[str, Field(..., title="Patient ID", description="Unique patient ID, e.g. p001", json_schema_extra={"example": "p001"})]
-
-    name: Annotated[str, Field(..., title="Patient Name", description="Full name of the patient", json_schema_extra={"example": "John Doe"})]
-
-    age: Annotated[int, Field(..., title="Patient Age", description="Age of the patient", json_schema_extra={"example": 30})]
-
-    city: Annotated[str, Field(..., title="Patient City", description="City of the patient", json_schema_extra={"example": "New York"})]
-
-    gender: Annotated[str, Field(..., title="Patient Gender", description="Gender of the patient", json_schema_extra={"example": "Male"})]
-
-    disease: Annotated[str, Field(..., title="Patient Disease", description="Disease of the patient", json_schema_extra={"example": "Diabetes"})]
-
-    height: Annotated[int, Field(..., title="Patient Height", description="Height of the patient in centimeters", json_schema_extra={"example": 175})]
-
-    weight: Annotated[int, Field(..., title="Patient Weight", description="Weight of the patient in kilograms", json_schema_extra={"example": 75.0})]
+    id:      Annotated[str,             Field(..., title="Patient ID",      description="Unique patient ID, e.g. p001",         json_schema_extra={"example": "p001"})]
+    name:    Annotated[str,             Field(..., title="Patient Name",    description="Full name of the patient",             json_schema_extra={"example": "John Doe"})]
+    age:     Annotated[int,             Field(..., title="Patient Age",     description="Age of the patient (1–120)",           gt=0, lt=120,  json_schema_extra={"example": 30})]
+    city:    Annotated[str,             Field(..., title="Patient City",    description="City of the patient",                  json_schema_extra={"example": "New York"})]
+    gender:  Annotated[Literal["male", "female"], Field(..., title="Patient Gender",  description="Gender: male or female",               json_schema_extra={"example": "male"})]
+    disease: Annotated[str,             Field(..., title="Patient Disease", description="Disease of the patient",               json_schema_extra={"example": "Diabetes"})]
+    height:  Annotated[float,           Field(..., title="Patient Height",  description="Height in cm (50–250)",                gt=50, lt=250, json_schema_extra={"example": 175})]
+    weight:  Annotated[float,           Field(..., title="Patient Weight",  description="Weight in kg (2–300)",                 gt=2,  lt=300, json_schema_extra={"example": 75.0})]
 
     @computed_field
     @property
