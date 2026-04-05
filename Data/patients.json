@@ -6,7 +6,9 @@
     "gender": "male",
     "disease": "Diabetes",
     "height": 175,
-    "weight": 80
+    "weight": 80,
+    "bmi": 26.12,
+    "obesity": "Overweight"
   },
   "p002": {
     "name": "Jane Smith",
@@ -15,7 +17,9 @@
     "gender": "female",
     "disease": "Hypertension",
     "height": 162,
-    "weight": 65
+    "weight": 65,
+    "bmi": 24.77,
+    "obesity": "Normal weight"
   },
   "p003": {
     "name": "Bob Johnson",
@@ -24,7 +28,9 @@
     "gender": "male",
     "disease": "Heart Disease",
     "height": 180,
-    "weight": 88
+    "weight": 88,
+    "bmi": 27.16,
+    "obesity": "Overweight"
   },
   "p004": {
     "name": "Alice Brown",
@@ -33,7 +39,9 @@
     "gender": "female",
     "disease": "Asthma",
     "height": 168,
-    "weight": 62
+    "weight": 62,
+    "bmi": 21.97,
+    "obesity": "Normal weight"
   },
   "p005": {
     "name": "Charlie Wilson",
@@ -42,7 +50,9 @@
     "gender": "male",
     "disease": "COPD",
     "height": 172,
-    "weight": 85
+    "weight": 85,
+    "bmi": 28.73,
+    "obesity": "Overweight"
   },
   "p006": {
     "name": "Emma Davis",
@@ -51,7 +61,9 @@
     "gender": "female",
     "disease": "Arthritis",
     "height": 165,
-    "weight": 68
+    "weight": 68,
+    "bmi": 24.98,
+    "obesity": "Normal weight"
   },
   "p007": {
     "name": "Frank Miller",
@@ -60,7 +72,9 @@
     "gender": "male",
     "disease": "Kidney Disease",
     "height": 178,
-    "weight": 82
+    "weight": 82,
+    "bmi": 25.88,
+    "obesity": "Overweight"
   },
   "p008": {
     "name": "Grace Lee",
@@ -69,7 +83,9 @@
     "gender": "female",
     "disease": "Thyroid Disorder",
     "height": 160,
-    "weight": 60
+    "weight": 60,
+    "bmi": 23.44,
+    "obesity": "Normal weight"
   },
   "p009": {
     "name": "Henry Martinez",
@@ -78,7 +94,9 @@
     "gender": "male",
     "disease": "High Cholesterol",
     "height": 177,
-    "weight": 90
+    "weight": 90,
+    "bmi": 28.73,
+    "obesity": "Overweight"
   },
   "p010": {
     "name": "Iris Taylor",
@@ -87,6 +105,8 @@
     "gender": "female",
     "disease": "Depression",
     "height": 166,
-    "weight": 67
+    "weight": 67,
+    "bmi": 24.31,
+    "obesity": "Normal weight"
   }
 }

@@ -65,7 +65,7 @@ def get_patient(
     patient_id: str = Path(
         ...,                                            # required — no default value
         description="Unique patient ID, e.g. p001",
-        example="p001"
+        examples=["p001"]
     )
 ):
     """
@@ -90,12 +90,12 @@ def sort_patients(
     sort_by: str = Query(
         ...,                                                            # required
         description="Field to sort by: name, age, gender, height, weight, city, disease",
-        example="age"
+        examples=["age"]
     ),
     order: str = Query(
         "desc",                                                         # default value
         description="Sort order: asc (low to high) or desc (high to low)",
-        example="asc"
+        examples=["desc", "asc"]
     )
 ):
     """
@@ -110,7 +110,7 @@ def sort_patients(
     data = load_data()
 
     # Validate sort_by against allowed fields to prevent KeyError on the sort.
-    allowed_fields = ["name", "age", "gender", "height", "weight", "city", "disease"]
+    allowed_fields = ["name", "age", "gender", "height", "weight", "city", "disease", "bmi", "obesity"]
     if sort_by not in allowed_fields:
         raise HTTPException(status_code=400, detail=f"Invalid sort field. Allowed: {allowed_fields}")
 
