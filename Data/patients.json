@@ -110,14 +110,14 @@
         "obesity": "Normal weight"
     },
     "p011": {
-        "name": "Eva Miller",
-        "age": 42,
-        "city": "San Francisco",
-        "gender": "female",
-        "disease": "Heart Disease",
-        "height": 165,
-        "weight": 68,
-        "bmi": 24.98,
-        "obesity": "Normal weight"
+        "name": "John Doe",
+        "age": 30,
+        "city": "New York",
+        "gender": "male",
+        "disease": "Diabetes",
+        "height": 120.0,
+        "weight": 75.0,
+        "bmi": 52.08,
+        "obesity": "Obese"
     }
 }

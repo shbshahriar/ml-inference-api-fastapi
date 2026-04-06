@@ -17,7 +17,6 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from pathlib import Path
 import json
-from typing import List
 
 app = FastAPI()
 

@@ -1,7 +1,7 @@
 # FastAPI for Machine Learning
 
 A structured, hands-on learning repository for building REST APIs with FastAPI — from basic routing to deploying ML models in production.
-Each lesson lives in its own numbered folder with a working Python API, a markdown guide, and interactive HTML references.
+Each lesson lives in its own numbered folder with a working Python API and a markdown guide.
 
 ---
 
@@ -23,7 +23,6 @@ Each lesson lives in its own numbered folder with a working Python API, a markdo
 - [uv](https://docs.astral.sh/uv/) installed
 
 ```bash
-# Install uv (if not already installed)
 pip install uv
 ```
 
@@ -32,7 +31,6 @@ pip install uv
 ## Setup
 
 ```bash
-# Clone the repository
 git clone https://github.com/shbshahriar/ml-inference-api-fastapi.git
 cd FastAPI_practice
 
@@ -55,6 +53,8 @@ uv run uvicorn <folder>.<file>:app --reload
 | 02 — First App | `uv run uvicorn 02_fastapi_setup.first_app:app --reload` |
 | 03 — HTTP Methods | `uv run uvicorn 03_http_methods.crud_api:app --reload` |
 | 04 — Path & Query Params | `uv run uvicorn 04_path_query_params.path_query_api:app --reload` |
+| 05 — POST Requests | `uv run uvicorn 05_post_requests.post_requests_api:app --reload` |
+| 06 — PUT & DELETE | `uv run uvicorn 06_put_delete_requests.put_delete_requests_api:app --reload` |
 
 Once running, visit:
 
@@ -98,28 +98,23 @@ def home():
 ---
 
 ### 03 — HTTP Methods (CRUD)
-**File:** `03_http_methods/crud_api.py`  
+**File:** `03_http_methods/crud_api.py`
 **Data:** `Data/patients.json`
 
-Patient Management API demonstrating all four HTTP methods:
+Patient Management API introducing all four HTTP methods and their CRUD mapping.
 
 | Method | Endpoint | Action |
 |--------|----------|--------|
+| `GET` | `/` | Health check |
 | `GET` | `/view` | Retrieve all patients |
-| `GET` | `/view/{id}` | Retrieve one patient |
-| `POST` | `/create` | Add a new patient |
-| `PUT` | `/update/{id}` | Replace a patient record |
-| `DELETE` | `/delete/{id}` | Remove a patient |
 
-Key concepts: CRUD → HTTP mapping, idempotency, JSON as a flat-file database, `HTTPException` for proper error responses.
+Key concepts: CRUD → HTTP mapping, `HTTPException` for error responses, JSON as a flat-file database.
 
 ---
 
 ### 04 — Path & Query Parameters
-**File:** `04_path_query_params/path_query_api.py`  
+**File:** `04_path_query_params/path_query_api.py`
 **Data:** `Data/patients.json`
-
-Extends the Patient API with parameter handling:
 
 | Endpoint | Type | Example |
 |----------|------|---------|
@@ -127,48 +122,48 @@ Extends the Patient API with parameter handling:
 | `/sort?sort_by=age&order=asc` | Query parameters | `/sort?sort_by=name&order=desc` |
 
 Key concepts:
-
 - **Path parameter** — identifies *which* resource (`/patient/p001`)
 - **Query parameter** — controls *how* to retrieve data (`?sort_by=age`)
 - `Path()` — adds descriptions, examples, and validation to path params in Swagger
 - `Query()` — adds defaults, allowed values, and descriptions to query params
-- `HTTPException` — returns correct 400/404 status codes instead of empty responses
+- HTTP status codes — returning correct 400/404 instead of empty responses
 
 ---
 
-### 05 — POST Requests *(coming soon)*
-Request body handling with Pydantic models.
+### 05 — POST Requests
+**File:** `05_post_requests/post_requests_api.py`
+**Data:** `Data/patients.json`
+
+| Endpoint | Action |
+|----------|--------|
+| `POST /create` | Add a new patient record |
+
+Key concepts:
+- Request body — structured JSON sent by the client
+- Pydantic model with `Annotated` + `Field` — type hints and metadata in one declaration
+- `Literal["male", "female"]` — restrict gender to allowed values
+- `computed_field` — auto-generate `bmi` and `obesity` from `height` and `weight`
+- Duplicate check — `400` if the patient ID already exists
+- `model_dump(exclude={"id"})` — use ID as dict key, exclude from stored value
 
 ---
 
-### 06 — PUT & DELETE Requests *(coming soon)*
-Update and delete operations with validation.
+### 06 — PUT & DELETE Requests
+**File:** `06_put_delete_requests/put_delete_requests_api.py`
+**Data:** `Data/patients.json`
 
----
+Completes the full CRUD cycle.
 
-### 07 — Serving ML Models *(coming soon)*
-Load a trained model → accept input → return prediction as JSON.  
-Projects: Iris Classification, House Price Prediction, Insurance Cost, Customer Churn.
+| Endpoint | Action |
+|----------|--------|
+| `PUT /patient/{patient_id}` | Partially update an existing patient |
+| `DELETE /patient/{patient_id}` | Remove a patient record |
 
----
-
-### 08 — Improving APIs *(coming soon)*
-Route structure, response formatting, and API best practices.
-
----
-
-### 09 — Docker for ML *(coming soon)*
-Writing a `Dockerfile`, `docker build`, and `docker run`.
-
----
-
-### 10 — Dockerizing FastAPI *(coming soon)*
-Containerizing a complete FastAPI application.
-
----
-
-### 11 — Deploying on AWS *(coming soon)*
-Deploying a containerized FastAPI app to a cloud platform.
+Key concepts:
+- `PatientUpdate` model — all fields `Optional` for partial updates
+- `model_dump(exclude_unset=True)` — only apply fields the client actually sent
+- BMI recomputation — `compute_bmi()` and `compute_obesity()` helper functions called by both the model and the PUT endpoint, single source of truth
+- 404 guard — validate existence before any mutation
 
 ---
 
@@ -178,27 +173,35 @@ Deploying a containerized FastAPI app to a cloud platform.
 FastAPI_practice/
 │
 ├── Data/
-│   └── patients.json              # Shared dataset (dict keyed by patient ID)
+│   └── patients.json                      # Shared dataset (dict keyed by patient ID)
 │
 ├── 01_what_is_api/
 │   ├── The Modern API Handbook.html
 │   └── FastAPI_Mastery_Interactive_Guide.html
 │
 ├── 02_fastapi_setup/
-│   ├── first_app.py               # First FastAPI app
-│   └── guide.md                   # Lesson notes
+│   ├── first_app.py                       # First FastAPI app
+│   └── guide.md
 │
 ├── 03_http_methods/
-│   ├── crud_api.py                # GET, POST, PUT, DELETE
+│   ├── crud_api.py                        # GET endpoints
 │   └── guide.md
 │
 ├── 04_path_query_params/
-│   ├── path_query_api.py          # Path & query parameter demo
+│   ├── path_query_api.py                  # Path & query parameters
 │   └── guide.md
 │
-├── main.py                        # Root stub (not used for lessons)
-├── pyproject.toml                 # uv project config & dependencies
-├── .python-version                # Pins Python 3.13
+├── 05_post_requests/
+│   ├── post_requests_api.py               # POST /create with Pydantic validation
+│   └── guide.md
+│
+├── 06_put_delete_requests/
+│   ├── put_delete_requests_api.py         # PUT /patient/{id}, DELETE /patient/{id}
+│   └── guide.md
+│
+├── main.py                                # Root stub (not used for lessons)
+├── pyproject.toml                         # uv project config & dependencies
+├── .python-version                        # Pins Python 3.13
 └── README.md
 ```
 
@@ -208,7 +211,7 @@ FastAPI_practice/
 
 - **Always use `uv`** — never `pip` directly
 - **Run from the project root** — relative imports and file paths depend on it
-- **Data file** — `Data/patients.json` is shared across lessons 03 and 04
+- **Data file** — `Data/patients.json` is shared across lessons 03–06
 
 ---
 
@@ -222,8 +225,6 @@ fastapi = ">=0.135.3"
 uvicorn = ">=0.43.0"
 pydantic = ">=2.12.5"
 ```
-
-Add a new package:
 
 ```bash
 uv add <package-name>
