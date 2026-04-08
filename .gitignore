@@ -9,3 +9,13 @@ wheels/
 # Virtual environments
 .venv
 .env
+
+# Added entries to prevent pushing unnecessary files
+*.log
+*.sqlite3
+.DS_Store
+*.bak
+*.swp
+*.tmp
+.idea/
+.vscode/
