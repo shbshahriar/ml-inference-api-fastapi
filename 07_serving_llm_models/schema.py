@@ -16,22 +16,20 @@ class ChatMessage(BaseModel):
 
     weight: Annotated[Optional[float], Field(description="The weight of the person in kilograms", ge=0, le=500, json_schema_extra={"example": 70.2})]
 
-    message: Annotated[str, Field(..., description="The message content", max_length=500, min_length=10, json_schema_extra={"example": "Hello, how are you?"})]
-
-    exercise: Annotated[Literal["none", "light", "moderate", "heavy"], Field(description="The level of exercise the person does", json_schema_extra={"example": "moderate"})]
+    exercise: Annotated[Optional[Literal["none", "light", "moderate", "heavy"]], Field(description="The level of exercise the person does", json_schema_extra={"example": "moderate"})]
 
     sleep_hours: Annotated[Optional[float], Field(description="The number of hours the person sleeps per day", ge=0, le=24, json_schema_extra={"example": 7.5})]
 
-    smooking: Annotated[Literal["yes", "no"], Field(description="Whether the person smokes or not", json_schema_extra={"example": "no"})]
+    smooking: Annotated[Optional[Literal["yes", "no"]], Field(description="Whether the person smokes or not", json_schema_extra={"example": "no"})]
 
     text: Annotated[str, Field(..., description="Current concern of the patient", max_length=1000, min_length=10, json_schema_extra={"example": "This is a sample message for testing the schema validation."})]
 
     @computed_field
     @property
-    def bmi(self) -> float:
+    def bmi(self) -> Optional[float]:
         return calculate_bmi(self.weight, self.height)
 
     @computed_field
     @property
-    def obesity(self) -> str:
+    def obesity(self) -> Optional[str]:
         return calculate_obesity(self.bmi)

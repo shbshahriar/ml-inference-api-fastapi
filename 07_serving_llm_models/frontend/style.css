@@ -1,0 +1,99 @@
+body {
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* ── Form elements ── */
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.field-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #57534e;
+  letter-spacing: 0.02em;
+}
+
+.field-input {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1.5px solid #d6d3d1;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #292524;
+  background: #fafaf9;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.field-input:focus {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 3px #fef3c7;
+  background: #fff;
+}
+
+.field-input::placeholder {
+  color: #a8a29e;
+}
+
+/* ── Radio options ── */
+.radio-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #44403c;
+  cursor: pointer;
+  padding: 6px 14px;
+  border: 1.5px solid #d6d3d1;
+  border-radius: 8px;
+  background: #fafaf9;
+  transition: all 0.15s;
+  user-select: none;
+}
+
+.radio-option:has(input:checked) {
+  border-color: #f59e0b;
+  background: #fffbeb;
+  color: #92400e;
+  font-weight: 600;
+}
+
+.radio-option input[type="radio"] {
+  accent-color: #f59e0b;
+}
+
+/* ── Loading spinner ── */
+.spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2.5px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Typewriter cursor ── */
+.typewriter::after {
+  content: "▋";
+  display: inline-block;
+  animation: blink 0.9s step-start infinite;
+  color: #f59e0b;
+  margin-left: 2px;
+}
+
+.typewriter.done::after {
+  display: none;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}

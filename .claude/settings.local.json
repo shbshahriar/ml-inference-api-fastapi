@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(uv add:*)",
+      "Bash(uv run:*)",
+      "Bash(uv pip:*)",
+      "Bash(uv sync:*)",
+      "Bash(UV_LINK_MODE=copy uv sync --reinstall-package jsonpatch)",
+      "Bash(UV_LINK_MODE=copy uv sync)"
+    ]
+  }
+}

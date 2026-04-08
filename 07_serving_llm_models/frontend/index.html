@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Health Advisor</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="min-h-screen bg-stone-50 text-stone-800">
+
+  <!-- Header -->
+  <header class="bg-white border-b border-stone-200 px-6 py-4 flex items-center gap-3 shadow-sm">
+    <div class="w-9 h-9 rounded-full bg-amber-500 flex items-center justify-center text-white font-bold text-lg">+</div>
+    <div>
+      <h1 class="text-lg font-bold text-stone-800 leading-tight">AI Health Advisor</h1>
+      <p class="text-xs text-stone-500">Powered by LangChain &amp; OpenAI</p>
+    </div>
+  </header>
+
+  <main class="max-w-3xl mx-auto px-4 py-8 space-y-6">
+
+    <!-- Patient Profile Card -->
+    <div class="bg-white rounded-2xl shadow-sm border border-stone-200 p-6">
+      <h2 class="text-sm font-bold text-amber-600 uppercase tracking-widest mb-5">Patient Profile</h2>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+        <!-- Name -->
+        <div class="field-group">
+          <label class="field-label">Full Name <span class="text-red-400">*</span></label>
+          <input id="name" type="text" placeholder="e.g. Alice Smith" minlength="5" maxlength="50"
+            class="field-input" />
+        </div>
+
+        <!-- Age -->
+        <div class="field-group">
+          <label class="field-label">Age <span class="text-red-400">*</span></label>
+          <input id="age" type="number" placeholder="e.g. 30" min="0" max="120"
+            class="field-input" />
+        </div>
+
+        <!-- Gender -->
+        <div class="field-group">
+          <label class="field-label">Gender <span class="text-red-400">*</span></label>
+          <select id="gender" class="field-input">
+            <option value="">Select gender</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+          </select>
+        </div>
+
+        <!-- City -->
+        <div class="field-group">
+          <label class="field-label">City <span class="text-stone-400 font-normal">(optional)</span></label>
+          <input id="city" type="text" placeholder="e.g. New York" maxlength="100"
+            class="field-input" />
+        </div>
+
+        <!-- Height -->
+        <div class="field-group">
+          <label class="field-label">Height <span class="text-stone-400 font-normal">(cm, optional)</span></label>
+          <input id="height" type="number" placeholder="e.g. 175" min="0" max="300" step="0.1"
+            class="field-input" />
+        </div>
+
+        <!-- Weight -->
+        <div class="field-group">
+          <label class="field-label">Weight <span class="text-stone-400 font-normal">(kg, optional)</span></label>
+          <input id="weight" type="number" placeholder="e.g. 70" min="0" max="500" step="0.1"
+            class="field-input" />
+        </div>
+
+        <!-- Exercise -->
+        <div class="field-group">
+          <label class="field-label">Exercise Level <span class="text-stone-400 font-normal">(optional)</span></label>
+          <select id="exercise" class="field-input">
+            <option value="">Select level</option>
+            <option value="none">None</option>
+            <option value="light">Light</option>
+            <option value="moderate">Moderate</option>
+            <option value="heavy">Heavy</option>
+          </select>
+        </div>
+
+        <!-- Sleep hours -->
+        <div class="field-group">
+          <label class="field-label">Sleep Hours/Day <span class="text-stone-400 font-normal">(optional)</span></label>
+          <input id="sleep_hours" type="number" placeholder="e.g. 7.5" min="0" max="24" step="0.5"
+            class="field-input" />
+        </div>
+
+        <!-- Smoking (full width) -->
+        <div class="field-group sm:col-span-2">
+          <label class="field-label">Smoking <span class="text-stone-400 font-normal">(optional)</span></label>
+          <div class="flex gap-4 mt-1">
+            <label class="radio-option">
+              <input type="radio" name="smooking" value="no" checked /> No
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="smooking" value="yes" /> Yes
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="smooking" value="" /> Prefer not to say
+            </label>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Concern Card -->
+    <div class="bg-white rounded-2xl shadow-sm border border-stone-200 p-6">
+      <h2 class="text-sm font-bold text-amber-600 uppercase tracking-widest mb-5">Your Health Concern</h2>
+      <div class="field-group">
+        <label class="field-label">Describe your concern <span class="text-red-400">*</span></label>
+        <textarea id="text" rows="5" minlength="10" maxlength="1000"
+          placeholder="e.g. I've been feeling tired all the time and struggling to focus at work..."
+          class="field-input resize-none"></textarea>
+        <p class="text-xs text-stone-400 mt-1 text-right"><span id="char-count">0</span> / 1000</p>
+      </div>
+    </div>
+
+    <!-- Error -->
+    <div id="error-box" class="hidden bg-red-50 border border-red-200 text-red-700 rounded-xl px-5 py-4 text-sm"></div>
+
+    <!-- Submit -->
+    <button id="submit-btn" onclick="submitForm()"
+      class="w-full bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white font-bold py-3 rounded-xl transition-all duration-200 flex items-center justify-center gap-2">
+      <span id="btn-text">Get Health Advice</span>
+      <span id="btn-spinner" class="hidden spinner"></span>
+    </button>
+
+    <!-- Response Card -->
+    <div id="response-card" class="hidden bg-white rounded-2xl shadow-sm border border-amber-200 p-6">
+      <div class="flex items-center gap-2 mb-4">
+        <div class="w-7 h-7 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 font-bold text-sm">AI</div>
+        <h2 class="text-sm font-bold text-stone-700">Health Advisor Response</h2>
+      </div>
+      <div id="response-text" class="text-stone-700 text-sm leading-relaxed whitespace-pre-wrap typewriter"></div>
+    </div>
+
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
