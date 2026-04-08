@@ -40,6 +40,19 @@ from prompts import SYSTEM_PROMPT, build_user_prompt
 load_dotenv(Path(__file__).parent / ".env")
 
 # -----------------------------------------------------------------------------
+# LangSmith — Automatic LLM Tracing
+# -----------------------------------------------------------------------------
+# LangChain reads these environment variables automatically — no code change
+# needed. Every llm.invoke() call is logged to your LangSmith dashboard.
+#
+#   LANGCHAIN_TRACING_V2=true         → enables tracing
+#   LANGCHAIN_API_KEY=<your key>      → authenticates with LangSmith
+#   LANGCHAIN_PROJECT=ai-health-advisor → groups traces under this project
+#
+# View traces at: https://smith.langchain.com
+# To disable: set LANGCHAIN_TRACING_V2=false (or remove it from .env)
+
+# -----------------------------------------------------------------------------
 # App
 # -----------------------------------------------------------------------------
 

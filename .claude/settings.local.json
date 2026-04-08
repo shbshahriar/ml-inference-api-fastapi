@@ -6,7 +6,8 @@
       "Bash(uv pip:*)",
       "Bash(uv sync:*)",
       "Bash(UV_LINK_MODE=copy uv sync --reinstall-package jsonpatch)",
-      "Bash(UV_LINK_MODE=copy uv sync)"
+      "Bash(UV_LINK_MODE=copy uv sync)",
+      "Bash(UV_LINK_MODE=copy uv add langsmith)"
     ]
   }
 }
