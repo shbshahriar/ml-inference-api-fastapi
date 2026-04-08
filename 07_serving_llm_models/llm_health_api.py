@@ -30,6 +30,7 @@ from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage, HumanMessage
 from dotenv import load_dotenv
 import os
+import markdown
 
 from schema import ChatMessage
 from prompts import SYSTEM_PROMPT, build_user_prompt
@@ -145,7 +146,35 @@ def chat(data: ChatMessage):
         HumanMessage(content=user_prompt),
     ]
 
-    # Invoke the LLM synchronously and extract the text content from the response.
-    response = llm.invoke(messages)
+    # Invoke the LLM with a LangSmith trace config.
+    # run_name  → readable label instead of the default "ChatOpenAI"
+    # tags      → filterable labels in the LangSmith dashboard
+    # metadata  → structured patient context attached to each trace
+    #             (never include PII like name — only anonymised signals)
+    response = llm.invoke(
+        messages,
+        config={
+            "run_name": "health-advice",
+            "tags": [
+                os.getenv("MODEL_NAME", "gpt-4.1-nano"),
+                "health-advisor",
+                data.gender,
+                data.obesity or "bmi-unknown",
+                data.exercise or "exercise-unknown",
+            ],
+            "metadata": {
+                "age":          data.age,
+                "gender":       data.gender,
+                "bmi":          data.bmi,
+                "bmi_category": data.obesity,
+                "exercise":     data.exercise,
+                "sleep_hours":  data.sleep_hours,
+                "smooking":     data.smooking,
+                "city":         data.city,
+                "model":        os.getenv("MODEL_NAME", "gpt-4.1-nano"),
+            },
+        },
+    )
 
-    return {"response": response.content}
+    if isinstance(response.content, str):
+        return {"response": markdown.markdown(response.content)}
