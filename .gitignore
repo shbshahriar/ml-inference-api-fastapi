@@ -9,6 +9,7 @@ wheels/
 # Virtual environments
 .venv
 .env
+**/.env
 
 # Added entries to prevent pushing unnecessary files
 *.log
