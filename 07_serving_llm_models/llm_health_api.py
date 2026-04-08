@@ -175,4 +175,4 @@ def chat(data: ChatMessage):
         },
     )
 
-    return {"response": response.content.markdown}
+    return {"response": response.content}
