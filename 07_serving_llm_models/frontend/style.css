@@ -1,78 +1,137 @@
+/* =============================================================================
+   style.css — Custom Styles for AI Health Advisor Frontend
+   =============================================================================
+   Tailwind handles layout and spacing. This file adds:
+     - Form element focus states and consistent sizing
+     - Radio pill button appearance
+     - Loading spinner animation
+     - Typewriter cursor effect for the AI response
+   ============================================================================= */
+
+
+/* ── Base font ─────────────────────────────────────────────────────────────── */
+
 body {
-  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+  font-family:
+    ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
     "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
-/* ── Form elements ── */
+
+/* ── Required / Optional label helpers ─────────────────────────────────────── */
+
+.required-star {
+  color: #f87171;   /* red-400 */
+  font-weight: 700;
+}
+
+.optional-tag {
+  color: #a8a29e;   /* stone-400 */
+  font-weight: 400;
+  font-size: 11px;
+}
+
+
+/* ── Field group wrapper ────────────────────────────────────────────────────── */
+
 .field-group {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
+
+/* ── Field label ────────────────────────────────────────────────────────────── */
+
 .field-label {
   font-size: 12px;
   font-weight: 600;
-  color: #57534e;
+  color: #57534e;           /* stone-600 */
   letter-spacing: 0.02em;
 }
 
+
+/* ── Input / Select / Textarea shared styles ────────────────────────────────── */
+
 .field-input {
   width: 100%;
-  padding: 9px 12px;
-  border: 1.5px solid #d6d3d1;
+  padding: 9px 13px;
+  border: 1.5px solid #d6d3d1;   /* stone-300 */
   border-radius: 10px;
   font-size: 14px;
-  color: #292524;
-  background: #fafaf9;
+  color: #292524;                 /* stone-800 */
+  background: #fafaf9;            /* stone-50 */
   outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  -webkit-appearance: none;       /* normalize across browsers (Safari/Chrome) */
+  appearance: none;               /* standard property for Firefox and others */
 }
 
+/* Focus ring — amber glow to match the app's color palette */
 .field-input:focus {
-  border-color: #f59e0b;
-  box-shadow: 0 0 0 3px #fef3c7;
-  background: #fff;
+  border-color: #f59e0b;          /* amber-400 */
+  box-shadow: 0 0 0 3px #fef3c7; /* amber-100 */
+  background: #ffffff;
 }
 
+/* Placeholder text */
 .field-input::placeholder {
-  color: #a8a29e;
+  color: #a8a29e;                 /* stone-400 */
 }
 
-/* ── Radio options ── */
-.radio-option {
-  display: flex;
+
+/* ── Radio pill buttons ──────────────────────────────────────────────────────
+   Each <label class="radio-pill"> wraps a hidden <input type="radio"> and a
+   visible <span>. CSS :has() selects the label when its radio is checked.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.radio-pill {
+  display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 14px;
-  color: #44403c;
-  cursor: pointer;
-  padding: 6px 14px;
-  border: 1.5px solid #d6d3d1;
-  border-radius: 8px;
+  padding: 7px 16px;
+  border: 1.5px solid #d6d3d1;   /* stone-300 */
+  border-radius: 999px;           /* fully rounded pill shape */
+  font-size: 13px;
+  font-weight: 500;
+  color: #57534e;                 /* stone-600 */
   background: #fafaf9;
-  transition: all 0.15s;
+  cursor: pointer;
   user-select: none;
+  transition: all 0.15s ease;
 }
 
-.radio-option:has(input:checked) {
+/* Hover state — subtle lift */
+.radio-pill:hover {
   border-color: #f59e0b;
-  background: #fffbeb;
-  color: #92400e;
-  font-weight: 600;
+  background: #fffbeb;            /* amber-50 */
 }
 
-.radio-option input[type="radio"] {
-  accent-color: #f59e0b;
+/* Checked state — amber accent */
+.radio-pill:has(input:checked) {
+  border-color: #f59e0b;          /* amber-400 */
+  background: #fef3c7;            /* amber-100 */
+  color: #92400e;                 /* amber-800 */
+  font-weight: 700;
 }
 
-/* ── Loading spinner ── */
+/* Hide the native radio button — visual state is handled by the pill */
+.radio-pill input[type="radio"] {
+  display: none;
+}
+
+
+/* ── Loading spinner ─────────────────────────────────────────────────────────
+   A simple CSS-only spinner used inside the submit button while waiting
+   for the LLM response. Shown / hidden by toggling the .hidden Tailwind class.
+   ─────────────────────────────────────────────────────────────────────────── */
+
 .spinner {
   display: inline-block;
   width: 18px;
   height: 18px;
-  border: 2.5px solid rgba(255, 255, 255, 0.4);
-  border-top-color: #fff;
+  border: 2.5px solid rgba(255, 255, 255, 0.35); /* faint white ring */
+  border-top-color: #ffffff;                      /* bright top arc */
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
@@ -81,15 +140,22 @@ body {
   to { transform: rotate(360deg); }
 }
 
-/* ── Typewriter cursor ── */
+
+/* ── Typewriter cursor ───────────────────────────────────────────────────────
+   The AI response container gets class="typewriter" while text is being
+   written character-by-character. The ::after pseudo-element shows a
+   blinking block cursor. Adding .done removes the cursor.
+   ─────────────────────────────────────────────────────────────────────────── */
+
 .typewriter::after {
   content: "▋";
   display: inline-block;
-  animation: blink 0.9s step-start infinite;
-  color: #f59e0b;
+  color: #f59e0b;                 /* amber-400 */
   margin-left: 2px;
+  animation: blink 0.9s step-start infinite;
 }
 
+/* Remove cursor once the full response has been typed out */
 .typewriter.done::after {
   display: none;
 }

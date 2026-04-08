@@ -4,45 +4,92 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AI Health Advisor</title>
+
+  <!-- Tailwind CSS — utility-first CSS framework loaded from CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="style.css" />
+
+  <!--
+    Custom styles — loaded via FastAPI's /static mount.
+    NOTE: This page must be opened through the FastAPI server at
+    http://127.0.0.1:8000, not by double-clicking the HTML file.
+  -->
+  <link rel="stylesheet" href="/static/style.css" />
 </head>
+
 <body class="min-h-screen bg-stone-50 text-stone-800">
 
-  <!-- Header -->
+  <!-- ═══════════════════════════════════════════════════════════════
+       HEADER — App title and subtitle
+  ════════════════════════════════════════════════════════════════ -->
   <header class="bg-white border-b border-stone-200 px-6 py-4 flex items-center gap-3 shadow-sm">
-    <div class="w-9 h-9 rounded-full bg-amber-500 flex items-center justify-center text-white font-bold text-lg">+</div>
+
+    <!-- Health cross badge -->
+    <div class="w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center text-white font-black text-xl select-none">
+      ✚
+    </div>
+
     <div>
       <h1 class="text-lg font-bold text-stone-800 leading-tight">AI Health Advisor</h1>
-      <p class="text-xs text-stone-500">Powered by LangChain &amp; OpenAI</p>
+      <p class="text-xs text-stone-400">Powered by LangChain &amp; OpenAI — for educational use only</p>
     </div>
+
   </header>
 
+  <!-- ═══════════════════════════════════════════════════════════════
+       MAIN CONTENT
+  ════════════════════════════════════════════════════════════════ -->
   <main class="max-w-3xl mx-auto px-4 py-8 space-y-6">
 
-    <!-- Patient Profile Card -->
+    <!-- ── Info Banner ─────────────────────────────────────────── -->
+    <div class="bg-amber-50 border border-amber-200 rounded-xl px-5 py-3 text-sm text-amber-800 flex items-start gap-2">
+      <span class="mt-0.5 text-base">ℹ</span>
+      <span>Fill in your profile and describe your health concern. The AI will provide personalized lifestyle advice based on your inputs.</span>
+    </div>
+
+    <!-- ── Patient Profile Card ────────────────────────────────── -->
     <div class="bg-white rounded-2xl shadow-sm border border-stone-200 p-6">
-      <h2 class="text-sm font-bold text-amber-600 uppercase tracking-widest mb-5">Patient Profile</h2>
+      <h2 class="text-xs font-bold text-amber-600 uppercase tracking-widest mb-5">
+        Patient Profile
+      </h2>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <!-- 2-column grid for profile fields -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
 
-        <!-- Name -->
+        <!-- Full Name — required (min 5, max 50 chars) -->
         <div class="field-group">
-          <label class="field-label">Full Name <span class="text-red-400">*</span></label>
-          <input id="name" type="text" placeholder="e.g. Alice Smith" minlength="5" maxlength="50"
-            class="field-input" />
+          <label class="field-label">
+            Full Name <span class="required-star">*</span>
+          </label>
+          <input
+            id="name"
+            type="text"
+            placeholder="e.g. Alice Smith"
+            minlength="5"
+            maxlength="50"
+            class="field-input"
+          />
         </div>
 
-        <!-- Age -->
+        <!-- Age — required (0–120) -->
         <div class="field-group">
-          <label class="field-label">Age <span class="text-red-400">*</span></label>
-          <input id="age" type="number" placeholder="e.g. 30" min="0" max="120"
-            class="field-input" />
+          <label class="field-label">
+            Age <span class="required-star">*</span>
+          </label>
+          <input
+            id="age"
+            type="number"
+            placeholder="e.g. 30"
+            min="0"
+            max="120"
+            class="field-input"
+          />
         </div>
 
-        <!-- Gender -->
+        <!-- Gender — required Literal["male", "female"] -->
         <div class="field-group">
-          <label class="field-label">Gender <span class="text-red-400">*</span></label>
+          <label class="field-label">
+            Gender <span class="required-star">*</span>
+          </label>
           <select id="gender" class="field-input">
             <option value="">Select gender</option>
             <option value="male">Male</option>
@@ -50,30 +97,57 @@
           </select>
         </div>
 
-        <!-- City -->
+        <!-- City — optional -->
         <div class="field-group">
-          <label class="field-label">City <span class="text-stone-400 font-normal">(optional)</span></label>
-          <input id="city" type="text" placeholder="e.g. New York" maxlength="100"
-            class="field-input" />
+          <label class="field-label">
+            City <span class="optional-tag">(optional)</span>
+          </label>
+          <input
+            id="city"
+            type="text"
+            placeholder="e.g. New York"
+            maxlength="100"
+            class="field-input"
+          />
         </div>
 
-        <!-- Height -->
+        <!-- Height — optional, in centimeters -->
         <div class="field-group">
-          <label class="field-label">Height <span class="text-stone-400 font-normal">(cm, optional)</span></label>
-          <input id="height" type="number" placeholder="e.g. 175" min="0" max="300" step="0.1"
-            class="field-input" />
+          <label class="field-label">
+            Height <span class="optional-tag">(cm, optional)</span>
+          </label>
+          <input
+            id="height"
+            type="number"
+            placeholder="e.g. 175"
+            min="0"
+            max="300"
+            step="0.1"
+            class="field-input"
+          />
         </div>
 
-        <!-- Weight -->
+        <!-- Weight — optional, in kilograms -->
         <div class="field-group">
-          <label class="field-label">Weight <span class="text-stone-400 font-normal">(kg, optional)</span></label>
-          <input id="weight" type="number" placeholder="e.g. 70" min="0" max="500" step="0.1"
-            class="field-input" />
+          <label class="field-label">
+            Weight <span class="optional-tag">(kg, optional)</span>
+          </label>
+          <input
+            id="weight"
+            type="number"
+            placeholder="e.g. 70"
+            min="0"
+            max="500"
+            step="0.1"
+            class="field-input"
+          />
         </div>
 
-        <!-- Exercise -->
+        <!-- Exercise Level — optional Literal["none","light","moderate","heavy"] -->
         <div class="field-group">
-          <label class="field-label">Exercise Level <span class="text-stone-400 font-normal">(optional)</span></label>
+          <label class="field-label">
+            Exercise Level <span class="optional-tag">(optional)</span>
+          </label>
           <select id="exercise" class="field-input">
             <option value="">Select level</option>
             <option value="none">None</option>
@@ -83,65 +157,122 @@
           </select>
         </div>
 
-        <!-- Sleep hours -->
+        <!-- Sleep Hours — optional, 0–24 -->
         <div class="field-group">
-          <label class="field-label">Sleep Hours/Day <span class="text-stone-400 font-normal">(optional)</span></label>
-          <input id="sleep_hours" type="number" placeholder="e.g. 7.5" min="0" max="24" step="0.5"
-            class="field-input" />
+          <label class="field-label">
+            Sleep Hours / Day <span class="optional-tag">(optional)</span>
+          </label>
+          <input
+            id="sleep_hours"
+            type="number"
+            placeholder="e.g. 7.5"
+            min="0"
+            max="24"
+            step="0.5"
+            class="field-input"
+          />
         </div>
 
-        <!-- Smoking (full width) -->
+        <!-- Smoking — optional pill-style radio buttons (full-width row) -->
         <div class="field-group sm:col-span-2">
-          <label class="field-label">Smoking <span class="text-stone-400 font-normal">(optional)</span></label>
-          <div class="flex gap-4 mt-1">
-            <label class="radio-option">
-              <input type="radio" name="smooking" value="no" checked /> No
+          <label class="field-label">
+            Smoking <span class="optional-tag">(optional)</span>
+          </label>
+          <div class="flex flex-wrap gap-3 mt-1">
+
+            <!-- Default: No -->
+            <label class="radio-pill">
+              <input type="radio" name="smooking" value="no" checked />
+              <span>No</span>
             </label>
-            <label class="radio-option">
-              <input type="radio" name="smooking" value="yes" /> Yes
+
+            <label class="radio-pill">
+              <input type="radio" name="smooking" value="yes" />
+              <span>Yes</span>
             </label>
-            <label class="radio-option">
-              <input type="radio" name="smooking" value="" /> Prefer not to say
+
+            <!-- Empty string → field omitted from the API payload -->
+            <label class="radio-pill">
+              <input type="radio" name="smooking" value="" />
+              <span>Prefer not to say</span>
             </label>
+
           </div>
         </div>
 
-      </div>
-    </div>
+      </div><!-- /grid -->
+    </div><!-- /profile card -->
 
-    <!-- Concern Card -->
+    <!-- ── Health Concern Card ─────────────────────────────────── -->
     <div class="bg-white rounded-2xl shadow-sm border border-stone-200 p-6">
-      <h2 class="text-sm font-bold text-amber-600 uppercase tracking-widest mb-5">Your Health Concern</h2>
+      <h2 class="text-xs font-bold text-amber-600 uppercase tracking-widest mb-5">
+        Your Health Concern
+      </h2>
+
       <div class="field-group">
-        <label class="field-label">Describe your concern <span class="text-red-400">*</span></label>
-        <textarea id="text" rows="5" minlength="10" maxlength="1000"
-          placeholder="e.g. I've been feeling tired all the time and struggling to focus at work..."
-          class="field-input resize-none"></textarea>
-        <p class="text-xs text-stone-400 mt-1 text-right"><span id="char-count">0</span> / 1000</p>
+        <label class="field-label">
+          Describe your concern <span class="required-star">*</span>
+          <span class="optional-tag ml-1">(min 10 chars · Ctrl+Enter to submit)</span>
+        </label>
+        <textarea
+          id="text"
+          rows="5"
+          minlength="10"
+          maxlength="1000"
+          placeholder="e.g. I've been feeling exhausted all day and struggling to focus at work..."
+          class="field-input resize-none"
+        ></textarea>
+        <!-- Live character counter -->
+        <p class="text-xs text-stone-400 mt-1 text-right">
+          <span id="char-count">0</span> / 1000
+        </p>
       </div>
     </div>
 
-    <!-- Error -->
-    <div id="error-box" class="hidden bg-red-50 border border-red-200 text-red-700 rounded-xl px-5 py-4 text-sm"></div>
+    <!-- ── Validation Error Box (hidden by default) ────────────── -->
+    <div
+      id="error-box"
+      class="hidden bg-red-50 border border-red-200 text-red-700 rounded-xl px-5 py-4 text-sm"
+    ></div>
 
-    <!-- Submit -->
-    <button id="submit-btn" onclick="submitForm()"
-      class="w-full bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white font-bold py-3 rounded-xl transition-all duration-200 flex items-center justify-center gap-2">
+    <!-- ── Submit Button ───────────────────────────────────────── -->
+    <button
+      id="submit-btn"
+      onclick="submitForm()"
+      class="w-full bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-bold py-3.5 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-sm"
+    >
       <span id="btn-text">Get Health Advice</span>
+      <!-- Spinner — shown while waiting for the LLM response -->
       <span id="btn-spinner" class="hidden spinner"></span>
     </button>
 
-    <!-- Response Card -->
-    <div id="response-card" class="hidden bg-white rounded-2xl shadow-sm border border-amber-200 p-6">
+    <!-- ── AI Response Card (hidden until a response arrives) ──── -->
+    <div
+      id="response-card"
+      class="hidden bg-white rounded-2xl shadow-sm border border-amber-200 p-6"
+    >
+      <!-- Card header -->
       <div class="flex items-center gap-2 mb-4">
-        <div class="w-7 h-7 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 font-bold text-sm">AI</div>
+        <div class="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 font-black text-sm select-none">
+          AI
+        </div>
         <h2 class="text-sm font-bold text-stone-700">Health Advisor Response</h2>
       </div>
-      <div id="response-text" class="text-stone-700 text-sm leading-relaxed whitespace-pre-wrap typewriter"></div>
+
+      <!--
+        Response text — rendered with a typewriter animation via script.js.
+        The .typewriter class adds a blinking cursor; .done removes it.
+      -->
+      <div
+        id="response-text"
+        class="text-stone-700 text-sm leading-relaxed whitespace-pre-wrap typewriter"
+      ></div>
     </div>
 
-  </main>
+  </main><!-- /main -->
 
-  <script src="script.js"></script>
+  <!-- JavaScript — loaded via FastAPI's /static mount -->
+  <script src="/static/script.js"></script>
+
 </body>
 </html>

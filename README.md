@@ -14,6 +14,8 @@ Each lesson lives in its own numbered folder with a working Python API and a mar
 | **Uvicorn** | ASGI server |
 | **Pydantic** | Data validation |
 | **uv** | Package & environment manager |
+| **LangChain** | LLM orchestration framework |
+| **langchain-openai** | LangChain wrapper for the OpenAI API |
 
 ---
 
@@ -55,6 +57,7 @@ uv run uvicorn <folder>.<file>:app --reload
 | 04 — Path & Query Params | `uv run uvicorn 04_path_query_params.path_query_api:app --reload` |
 | 05 — POST Requests | `uv run uvicorn 05_post_requests.post_requests_api:app --reload` |
 | 06 — PUT & DELETE | `uv run uvicorn 06_put_delete_requests.put_delete_requests_api:app --reload` |
+| 07 — LLM with LangChain | `uv run uvicorn 07_serving_llm_models.llm_health_api:app --reload` |
 
 Once running, visit:
 
@@ -167,6 +170,35 @@ Key concepts:
 
 ---
 
+### 07 — Serving an LLM with FastAPI + LangChain
+**Files:** `07_serving_llm_models/`
+**Frontend:** `07_serving_llm_models/frontend/`
+
+Full-stack AI Health Advisor. The patient submits their profile and health concern through a browser UI; FastAPI validates it, builds a prompt, and returns personalized advice from an OpenAI LLM via LangChain.
+
+| Endpoint | Action |
+|----------|--------|
+| `GET /` | Serves the HTML frontend |
+| `POST /chat` | Validates input, calls LLM, returns health advice |
+
+Key concepts:
+- `LangChain` — LLM orchestration with `ChatOpenAI`, `SystemMessage`, `HumanMessage`
+- `Prompt engineering` — separate `SYSTEM_PROMPT` (persona) and dynamic user prompt (patient data)
+- `computed_field` — Pydantic auto-generates `bmi` and `obesity` from height and weight
+- `CORSMiddleware` — allows browsers to make cross-origin API calls
+- `StaticFiles` — FastAPI serves the HTML/CSS/JS frontend from the same process
+- `.env` — API key and model name loaded securely via `python-dotenv`
+
+```bash
+# Copy the env template and add your OpenAI API key
+cp 07_serving_llm_models/.env.example 07_serving_llm_models/.env
+
+# Run — frontend available at http://127.0.0.1:8000
+uv run uvicorn 07_serving_llm_models.llm_health_api:app --reload
+```
+
+---
+
 ## Project Structure
 
 ```
@@ -199,6 +231,18 @@ FastAPI_practice/
 │   ├── put_delete_requests_api.py         # PUT /patient/{id}, DELETE /patient/{id}
 │   └── guide.md
 │
+├── 07_serving_llm_models/
+│   ├── llm_health_api.py                  # FastAPI app — LangChain + static frontend
+│   ├── schema.py                          # ChatMessage Pydantic model
+│   ├── prompts.py                         # System prompt + user prompt builder
+│   ├── utils.py                           # BMI and obesity helpers
+│   ├── .env.example                       # API key template
+│   ├── guide.md
+│   └── frontend/
+│       ├── index.html                     # Patient form UI
+│       ├── style.css                      # Custom styles
+│       └── script.js                      # Validation, fetch, typewriter
+│
 ├── main.py                                # Root stub (not used for lessons)
 ├── pyproject.toml                         # uv project config & dependencies
 ├── .python-version                        # Pins Python 3.13
@@ -224,6 +268,10 @@ Managed by `uv` in `pyproject.toml`:
 fastapi = ">=0.135.3"
 uvicorn = ">=0.43.0"
 pydantic = ">=2.12.5"
+langchain = ">=0.3"
+langchain-openai = ">=0.3"
+python-dotenv = ">=1.0"
+aiofiles = ">=23.0"
 ```
 
 ```bash
