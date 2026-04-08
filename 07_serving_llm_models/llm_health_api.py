@@ -30,7 +30,6 @@ from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage, HumanMessage
 from dotenv import load_dotenv
 import os
-import markdown
 
 from schema import ChatMessage
 from prompts import SYSTEM_PROMPT, build_user_prompt
@@ -176,5 +175,4 @@ def chat(data: ChatMessage):
         },
     )
 
-    if isinstance(response.content, str):
-        return {"response": markdown.markdown(response.content)}
+    return {"response": response.content.markdown}
